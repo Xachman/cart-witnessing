@@ -170,9 +170,6 @@ class EmailsController extends AppController {
             $mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
             $mail->Port = 26;                                    // TCP port to connect to
 
-            $mail->setFrom('carts@gtiwebdev.com', 'Public Witnessing');
-            //$mail->addAddress($participant->email, $participant->first_name . " " . $participant->last_name);     // Add a recipient
-            $mail->addReplyTo('carts@gtiwebdev.com', 'Cart Witnessing');
 
             $mail->isHTML(true);                                  // Set email format to HTML
 
