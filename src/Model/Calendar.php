@@ -9,7 +9,7 @@ class Calendar {
     private $Participants;
 
     public function __construct() {
-        $this->Locations = TableRegistry::get('LocationsTable');
+        $this->Locations = TableRegistry::get('Locations');
         $this->ParticipantAvailability = TableRegistry::get('ParticipantsAvailabilityTable');
         $this->Participants = TableRegistry::get('ParticipantsTable');
     }
@@ -28,4 +28,19 @@ class Calendar {
 			$incDate->setDate($incDate->format("Y"), $incDate->format("m"), $incDate->format("d") +1);
 		}
     }
+
+    public function itterateLocations($startDateStr, $endDateStr, $callback) {
+		$startDate = new \DateTime($startDateStr);
+		$endDate = new \DateTime($endDateStr);
+		$incDate = new \DateTime($startDate->format("Y/m/d"));
+
+		while($incDate->getTimestamp() <= $endDate->getTimestamp()) {
+            $locations = $this->Locations->find("all", array(
+                "conditions" => array("day" => $incDate->format("w"))
+            ));
+            $callback($incDate, $locations);
+            $incDate->setDate($incDate->format("Y"), $incDate->format("m"), $incDate->format("d") +1);
+		}
+    }
+
 }

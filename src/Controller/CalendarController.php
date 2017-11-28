@@ -78,8 +78,19 @@ class CalendarController extends AppController
 		}
 	}
 
-	public function scheduleMonth($month) {
-		
+	public function generate($dateString = "") {
+		$date = new \DateTime($dateString);
+		$date->setDate($date->format("Y"), $date->format("m"), 1);
+		$title = $date->format("F - Y");
+		$calendarData = array();
+		$startDate = new \DateTime(date("Y/m/d", strtotime("-".$date->format("w")." days", strtotime($date->format("Y/m/1")))));
+		$date->setDate($date->format("Y"), $date->format("m"), $date->format("t"));
+		$endDate = new \DateTime(date("Y/m/d", strtotime("+".(6-$date->format("w"))." days", strtotime($date->format("Y/m/d")))));
+		$dateMap = $this->generateCalendarData($startDate->format("Y/m/d"), $endDate->format("Y/m/d"));
+
+		$calendarData['title'] = $title;
+		$calendarData['dateMap'] = $dateMap;
+		$this->set(compact('calendarData'));
 	}
 
 	private function getCalendarData($startDateStr = "", $endDateStr = "" ) {
@@ -101,7 +112,74 @@ class CalendarController extends AppController
 
 		return $dateMap;
 	}
+	private function generateCalendarData($startDateStr = "", $endDateStr = "" ) {
+		$count = 0;
+		$data = [];
+		$this->Calendar->itterateLocations($startDateStr, $endDateStr, function($date, $locations) use (&$count) {
+			$count++;
+			foreach($locations as $location) {
+				$data = $this->compileScheduledLocations($location);
+			}
+		});	
+	}
 
+	private function getTimes($location) {
+		$totalTime =  $location->end_time->format('U') - $location->start_time->format('U');
+		$times = [];
+		if($totalTime > 10800) {
+			$times = [
+				[
+					'start_time' => new \DateTime('@'.$location->start_time->format('U')), 
+					'end_time' => new \DateTime('@'.($location->start_time->format('U') + ($totalTime / 2)))
+				],
+				[
+					'start_time' => new \DateTime('@'.($location->end_time->format('U') - $totalTime / 2)), 
+					'end_time' => new \DateTime('@'.$location->end_time->format('U') ) 
+				],
+			];
+			return $times;
+		}
+
+		return [
+			[
+				'start_time' => new \DateTime('@'.$location->start_time->format('U')),
+				'end_time' => new \DateTime('@'.$location->end_time->format('U'))
+			]
+		];
+	}
+
+	private function getAvailibleParticipants($day) {
+		$participantAvail = $this->loadModel('ParticipantAvailability');
+		$participants = $this->loadModel('Participants');
+		$pAQuery = $participantAvail->find('all', [
+			'conditions' => [
+				'day' => $day,
+			]
+		])->select('ParticipantAvailability.participant_id');
+		$ids = [];
+
+		foreach($pAQuery as $pa) {
+			$ids[] = $pa->participant_id;
+		}
+		$participantsQuery = $participants->find('all')
+		->where(['id IN' => $ids]);
+
+		return $participantsQuery;
+	}
+
+	private compileScheduledLocations($location) {
+		$times = $this->getTimes($location);
+		$scheduledLocations = [];
+		$participants = $this->getAvailibleParticipants($location->day);
+		foreach($times) {
+			$optionalParticipant = [];
+			foreach($participants as $participant) {
+				if($times->start_time->format('U') >= $participant->)	
+			}
+		}
+	}
+
+	private getParticipants
 	private function getLocationsByDate($dateString) {
 		$locations = $this->Locations->find("all");
 		$targetDate = new \DateTime($dateString);
@@ -118,7 +196,6 @@ class CalendarController extends AppController
 
 		$this->loadModel("Participants");
 		$this->loadModel("Locations");
-
 		$locations = $this->Locations->find("all", array(
 					"conditions" => array("day" => $date->format("w"))
 					));
@@ -145,6 +222,7 @@ class CalendarController extends AppController
 		return $return;
 
 	}
+
 
 
 
