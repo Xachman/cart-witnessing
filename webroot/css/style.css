@@ -1,0 +1,10 @@
+.calendar .day {
+  float: left;
+  width: 14.2858%;
+  padding: 1em;
+  background: #aaa; }
+
+.calendar .calendar-title {
+  padding: 1em;
+  text-align: center;
+  font-size: 2rem; }

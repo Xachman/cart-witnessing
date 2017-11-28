@@ -1,0 +1,3 @@
+<?php return [
+    'calendarId' => 'yourcalid'
+]

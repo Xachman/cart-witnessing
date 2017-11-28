@@ -1,0 +1,11 @@
+version: "2"
+services:
+    web:
+      build: .
+      external_links:
+        - mddd:mdddhost
+      ports:
+        - "3000:80"
+      volumes: 
+        - ./:/var/www/
+      network_mode: bridge
