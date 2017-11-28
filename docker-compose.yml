@@ -9,3 +9,19 @@ services:
       volumes: 
         - ./:/var/www/
       network_mode: bridge
+    mysql:
+      image: mysql
+      ports:
+        - 3313:3306
+      environment:
+        MYSQL_DATABASE: carts
+        MYSQL_ROOT_PASSWORD: root
+      volumes:
+        - /var/lib/mysql
+      network_mode: bridge
+    testdb:
+      image: mysql
+      environment:
+        MYSQL_DATABASE: testdb
+        MYSQL_ROOT_PASSWORD: root
+      network_mode: bridge
