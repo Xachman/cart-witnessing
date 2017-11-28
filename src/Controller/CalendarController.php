@@ -91,6 +91,7 @@ class CalendarController extends AppController
 		$calendarData['title'] = $title;
 		$calendarData['dateMap'] = $dateMap;
 		$this->set(compact('calendarData'));
+		$this->render('month');
 	}
 
 	private function getCalendarData($startDateStr = "", $endDateStr = "" ) {
@@ -115,12 +116,11 @@ class CalendarController extends AppController
 	private function generateCalendarData($startDateStr = "", $endDateStr = "" ) {
 		$count = 0;
 		$data = [];
-		$this->Calendar->itterateLocations($startDateStr, $endDateStr, function($date, $locations) use (&$count) {
+		$this->Calendar->itterateLocations($startDateStr, $endDateStr, function($date, $locations) use (&$count, &$data) {
 			$count++;
-			foreach($locations as $location) {
-				$data = $this->compileScheduledLocations($location);
-			}
+			$data[$date->format('Y_m_d')] = $this->compileScheduledLocations($locations);
 		});	
+		return $data;
 	}
 
 	private function getTimes($location) {
@@ -148,38 +148,64 @@ class CalendarController extends AppController
 		];
 	}
 
-	private function getAvailibleParticipants($day) {
+	private function getAvailibleParticipants($time, $day) {
 		$participantAvail = $this->loadModel('ParticipantAvailability');
 		$participants = $this->loadModel('Participants');
 		$pAQuery = $participantAvail->find('all', [
 			'conditions' => [
 				'day' => $day,
+				'start_time >=' => $time['start_time']->format('h:i:s'),
+				'end_time <=' => $time['end_time']->format('h:i:s'),
 			]
 		])->select('ParticipantAvailability.participant_id');
 		$ids = [];
-
+			
 		foreach($pAQuery as $pa) {
 			$ids[] = $pa->participant_id;
 		}
-		$participantsQuery = $participants->find('all')
-		->where(['id IN' => $ids]);
+		if(count($ids) > 0) {
+			$participantsQuery = $participants->find('all')
+			->where(['id IN' => $ids]);
 
-		return $participantsQuery;
+			return $participantsQuery;
+		}
+
+		return false;
 	}
 
-	private compileScheduledLocations($location) {
-		$times = $this->getTimes($location);
-		$scheduledLocations = [];
-		$participants = $this->getAvailibleParticipants($location->day);
-		foreach($times) {
-			$optionalParticipant = [];
-			foreach($participants as $participant) {
-				if($times->start_time->format('U') >= $participant->)	
+	private function compileScheduledLocations($locations) {
+		$return = [];
+		foreach($locations as $location) {
+			$times = $this->getTimes($location);
+			foreach($times as $time) {
+				$participantsQuery = $this->getAvailibleParticipants($time, $location->day);
+				if($participantsQuery) {
+					$participants = $participantsQuery->toArray();
+					shuffle($participants);
+					$count = 0;
+					foreach($participants as $participant) {
+						$count++;
+						if($count > 2) break;	
+						$return['scheduled_locations'][] = [
+							"participant" 	=> $participant->first_name." ".$participant->last_name,
+							"start_time" 	 => $time['start_time'],
+							"end_time"      => $time['end_time'],
+							"participant_id"  => $participant->id,
+							'id' => false,
+							"location_id"  => $location->id
+							//	"locations" 	=> $this->getLocationsByDate($schedLoc->start_date)
+							
+						];
+					}
+				}
 			}
 		}
+		foreach($locations as $location) {
+			$return["locations"][] = $location; 
+		}
+		return $return;
 	}
 
-	private getParticipants
 	private function getLocationsByDate($dateString) {
 		$locations = $this->Locations->find("all");
 		$targetDate = new \DateTime($dateString);
