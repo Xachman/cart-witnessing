@@ -1,0 +1,6 @@
+vendor/
+/config/app.php
+/config/google.php
+node_modules/
+/tmp
+/logs
