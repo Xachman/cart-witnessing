@@ -5,10 +5,18 @@ namespace App\Controller;
 
 
 class GoogleCalendarAPIController extends AppController {
-	private $calendarId = \Cake\Core\Configure::read('Google.calendarId');
+	private $calendarId = "sd9na6b10g095djnmfhptfeibg@group.calendar.google.com";
 	private $format = 'Y-m-d\TH:i:sP';
 
-	public function updateEvents() {
+	public function updateEvents($month = false, $year = false) {
+		if(!$year) {
+			$year = date("Y");
+		}
+		if(!$month) {
+			echo "Please enter a month 1 - 12";
+			die;
+		}
+
 		$client = $this->getClient();
 		$service = new \Google_Service_Calendar($client);
 
@@ -17,9 +25,17 @@ class GoogleCalendarAPIController extends AppController {
 		$this->loadModel("Participants");
 		$events = array();
 
-		$startDate = new \DateTime(date("Y-m-d", strtotime("first day of next month")));
-		$endDate = new \DateTime(date("Y-m-d", strtotime("last day of next month")));
+		$createString = $month."-".$year."-1";
+		$startDate = \DateTime::createFromFormat("m-Y-d", $createString);
+		$endDate = \DateTime::createFromFormat("m-Y-d", $createString);
 
+
+		$startDate->modify("first day of this month");
+		$endDate->modify("last day of this month");
+
+		var_dump($startDate->format("Y-m-d"));
+		var_dump($endDate->format("Y-m-d"));
+		
 		//$startDate = new \DateTime(date("Y-m-d", strtotime("last day of this month")));
 		//$endDate = new \DateTime(date("Y-m-d", strtotime("last day of this month")));
 		$scheduledLocations = $this->ScheduledLocations->find('all', array(
@@ -59,12 +75,28 @@ class GoogleCalendarAPIController extends AppController {
 		die;	
 	}
 
-	public function deleteAll() {
-
+	public function deleteEvents($month = false, $year = false) {
+		if(!$year) {
+			$year = date("Y");
+		}
+		if(!$month) {
+			echo "Please enter a month 1 - 12";
+			die;
+		}
 		$client = $this->getClient();
 		$service = new \Google_Service_Calendar($client);
 
- 		$events = $service->events->listEvents($this->calendarId);
+		$startTime = \DateTime::createFromFormat("m-Y", $month."-".$year);
+		$endTime = \DateTime::createFromFormat("m-Y", $month."-".$year);
+
+		$startTime->modify("first day of this month");
+		$endTime->modify("first day of next month");
+		
+		$options = [
+			"timeMax" => $endTime->format($this->format),
+			"timeMin" => $startTime->format($this->format)
+		];
+ 		$events = $service->events->listEvents($this->calendarId, $options);
 		echo "<pre>";
 		var_dump($events->getItems());
 		echo "</pre>";
@@ -88,6 +120,42 @@ class GoogleCalendarAPIController extends AppController {
 		die;
 	}
 
+	public function addScheduledEvent($id) {
+		$client = $this->getClient();
+		$service = new \Google_Service_Calendar($client);
+		
+
+		$this->loadModel("ScheduledLocations");
+		$this->loadModel("Locations");
+		$this->loadModel("Participants");
+
+		$scheduledLocation = $this->ScheduledLocations->get($id);
+
+		$participant = $this->Participants->get($scheduledLocation->participant_id);
+		$location = $this->Locations->get($scheduledLocation->location_id);
+		$startTime = new \DateTime($scheduledLocation->schedule_date->format("Y-m-d")." ".$scheduledLocation->start_time->format("H:i:s"),  new \DateTimeZone('America/New_York'));
+		
+		$endTime = new \DateTime($scheduledLocation->schedule_date->format("Y-m-d")." ".$scheduledLocation->end_time->format("H:i:s"),  new \DateTimeZone('America/New_York'));
+		$eventDetails = array(
+			"summary" => $participant->first_name." ".$participant->last_name,
+			"location" => $location->name,
+			"description" => "",
+			"start" => array(
+				"dateTime" => $startTime->format($this->format),
+				"timeZone" => "America/New_York",
+			),
+			"end" => array(
+				"dateTime" => $endTime->format($this->format),
+				"timeZone" => "America/New_York",
+			),
+		);
+
+		$gscEvent = new \Google_Service_Calendar_Event($eventDetails);
+		$event = $service->events->insert($this->calendarId, $gscEvent);
+		printf('Event created: %s\n', $event->htmlLink);
+		die;
+	}
+
 	/**
 	 *  * Returns an authorized API client.
 	 *   * @return Google_Client the authorized client object
@@ -106,7 +174,7 @@ class GoogleCalendarAPIController extends AppController {
 			printf("File Not found  %s\n", $credentialsPath);
 			die;
 		}
-		var_dump($accessToken);
+	//	var_dump($accessToken);
 		$client->setAccessToken($accessToken);
 
 		// Refresh the token if it's expired.

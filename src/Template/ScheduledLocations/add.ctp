@@ -1,3 +1,7 @@
+<?php
+
+use Cake\I18n\Time;
+?>
 <nav class="large-3 medium-4 columns" id="actions-sidebar">
     <ul class="side-nav">
         <li class="heading"><?= __('Actions') ?></li>
@@ -16,8 +20,8 @@
             echo $this->Form->input('location_id', ['options' => $locations, 'empty' => true, 'default' => $locationId]);
             echo $this->Form->input('participant_id', ['options' => $participants, 'empty' => true]);
             echo $this->Form->input('schedule_date', ['empty' => true, 'default' => $selectedDate]);
-            echo $this->Form->input('start_time', ['empty' => true]);
-            echo $this->Form->input('end_time', ['empty' => true]);
+            echo $this->Form->input('start_time', ['empty' => true, 'default' => $selectedLocation->start_time]);
+            echo $this->Form->input('end_time', ['empty' => true, 'default' => $selectedLocation->end_time]);
             echo $this->Form->input('notes');
         ?>
     </fieldset>

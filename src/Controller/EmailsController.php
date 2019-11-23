@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Controller\AppController;
-
+use Cake\Mailer\Email;
 /**
  * Emails Controller
  *
@@ -12,13 +12,19 @@ use App\Controller\AppController;
 class EmailsController extends AppController {
 
     private $shortcodes = array();
-
     public function __construct(\Cake\Network\Request $request = null, \Cake\Network\Response $response = null, $name = null, $eventManager = null, $components = null) {
         parent::__construct($request, $response, $name, $eventManager, $components);
 
         $this->addShortcode("title", array($this, "getParticipantTitle"));
         $this->addShortcode("name", array($this, "getParticipantName"));
         $this->addShortcode("schedule", array($this, "getSchedule"));
+        $this->addShortcode("month", array($this, "getMonth"));
+        $this->addShortcode("participant_schedule", array($this, "participantSchedule"));
+        $this->addShortcode("name", array($this, "getName"));
+
+        $this->loadModel('Participants');
+        $this->loadModel('ScheduledLocations');
+        $this->loadModel('Locations');
     }
 
     /**
@@ -123,114 +129,29 @@ class EmailsController extends AppController {
      */
     public function sendMail($id = null, $send = false) {
         $email = $this->Emails->get($id);
-        if ($send) {
-            $this->loadModel('Participants');
-            $mail = new \PHPMailer();
-            $mail->isSMTP();                                      // Set mailer to use SMTP
-            $mail->Host = $this->host;  // Specify main and backup SMTP servers
-            $mail->SMTPAuth = true;                               // Enable SMTP authentication
-            $mail->Username = $this->email;                 // SMTP username
-            $mail->Password = $this->password;                           // SMTP password
-            $mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
-            $mail->Port = 26;                                    // TCP port to connect to
-
-            $mail->isHTML(true);                                  // Set email format to HTML
-
-            $mail->Subject = $email->subject;
-            $mail->Body = $this->parseShortcodes($email->message, $participant);
-            $mail->AltBody = $email->message;
-            if (!$mail->send()) {
+        $participants = $this->Participants->find('list');
+        if ($this->request->is(['patch', 'post', 'put'])) {
+            $data = $this->request->data;
+            $mail = $this->getEmail()
+            ->to('zironside@hotmail.com', 'Zachary Ironside')     // Add a recipient
+            ->subject($this->parseShortcodes($email->subject,$data));
+            if (!$mail->send($this->parseShortcodes($email->message, $data))) {
                 echo 'Message could not be sent.';
                 echo 'Mailer Error: ' . $mail->ErrorInfo;
             } else {
                 echo 'Message has been sent';
             }
         }
-        return $this->redirect(['action' => 'view', $id]);
+        $this->set(compact('email', 'participants'));
+        $this->set('_serialize', ['email']);
     }
 
-    /**
-     * testSendMail method
-     *
-     * @param string|null $id Email id.
-     * @return \Cake\Network\Response|null Redirects to index.
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
-    public function testSendMail($id = null, $send = false) {
-        $email = $this->Emails->get($id);
-        $this->loadModel('Participants');
-        $participant = $this->Participants->get(49);
-        if ($send) {
-            $mail = new \PHPMailer();
-            $mail->isSMTP();                                      // Set mailer to use SMTP
-            $mail->Host = $this->host;  // Specify main and backup SMTP servers
-            $mail->SMTPAuth = true;                               // Enable SMTP authentication
-            $mail->Username = $this->email;                 // SMTP username
-            $mail->Password = $this->password;                           // SMTP password
-            $mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
-            $mail->Port = 26;                                    // TCP port to connect to
 
-
-            $mail->isHTML(true);                                  // Set email format to HTML
-
-            $mail->Subject = $email->subject;
-            $mail->Body = $this->parseShortcodes($email->message, $participant);
-            $mail->AltBody = $email->message;
-            if (!$mail->send()) {
-                echo 'Message could not be sent.';
-                echo 'Mailer Error: ' . $mail->ErrorInfo;
-            } else {
-                echo 'Message has been sent';
-            }
-        }
-        return $this->redirect(['action' => 'view', $id]);
-    }
-
-    /**
-     * SendAllMail method
-     *
-     * @param string|null $id Email id.
-     * @return \Cake\Network\Response|null Redirects to index.
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
-    public function sendAllMail($id = null, $send = false) {
-        $email = $this->Emails->get($id);
-
-
-        if ($send) {
-            $this->loadModel('Participants');
-            $participants = $this->Participants->find("all", array(
-                'conditions' => array('Participants.email !=' => '', 'Participants.email IS NOT NULL')
-            ));
-            $mail = new \PHPMailer();
-            $mail->isSMTP();                                      // Set mailer to use SMTP
-            $mail->Host = $this->host;  // Specify main and backup SMTP servers
-            $mail->SMTPAuth = true;                               // Enable SMTP authentication
-            $mail->Username = $this->email;                 // SMTP username
-            $mail->Password = $this->password;                           // SMTP password
-            $mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
-            $mail->Port = 26;                                    // TCP port to connect to
-
-            $mail->setFrom($this->email, $this->senderName);
-            foreach ($participants as $participant) {
-                $mail->addAddress($participant->email);     // Add a recipient
-            }
-            $mail->addReplyTo($this->email, $this->senderName);
-
-            $mail->isHTML(true);                                  // Set email format to HTML
-
-            $mail->Subject = $email->subject;
-            $mail->Body = $this->parseShortcodes($email->message);
-            $mail->AltBody = $email->message;
-        }
-        return $this->redirect(['action' => 'view', $id]);
-    }
-
-    private function parseShortcodes($message, $participant = null) {
+    private function parseShortcodes($message, $data = null) {
         preg_match_all('{{(.*?)}}', $message, $matches);
         foreach ($matches[0] as $match) {
             $cleanedMatch = str_replace("}", "", str_replace("{{", "", $match));
-            $message = str_replace("{{" . $cleanedMatch . "}}", $this->envokeFunction($cleanedMatch, $participant), $message);
+            $message = str_replace("{{" . $cleanedMatch . "}}", $this->invokeFunction(trim($cleanedMatch), $data), $message);
         }
         return $message;
     }
@@ -280,11 +201,40 @@ class EmailsController extends AppController {
         return ob_get_clean();
     }
 
-    private function envokeFunction($key, $value) {
-        if (array_key_exists($key, $this->shortcodes)) {
+    private function invokeFunction($key, $value) {
+        if (array_key_exists(trim($key), $this->shortcodes)) {
             $keyFunc = $this->shortcodes[$key];
             return $keyFunc($value);
         }
+    }
+
+    private function getEmail() {
+        $email = new Email('default');
+        return $email->emailFormat('html')
+            ->from('carts@gtiwebdev.com', 'Cart Witnessing')
+            ->replyTo('carts@gtiwebdev.com', 'Cart Witnessing');
+    }
+
+    public function getMonth($data) {
+        return date("F", mktime(null, null, null, $data['date']['month']));
+    }
+
+    public function getName($data) {
+        $participant  = $this->Participants->get($data['participant']);
+        return $participant->full_name;
+    }
+
+    public function participantSchedule() {
+        $participant  = $this->Participants->get($data['participant']);
+
+        $scheduledLocations = $this->ScheduledLocations->find('all')->where([
+            'participant_id' => $participant->id,
+            'schedule_date BETWEEN ? AND ?' => array(date("Y-m-d")); 
+        ])
+        // get scheduled locations for date
+
+
+        return 
     }
 
 }

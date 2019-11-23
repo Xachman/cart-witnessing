@@ -64,6 +64,12 @@ class CalendarController extends AppController
 		$dateMap = $this->getCalendarData($startDate->format("Y/m/d"), $endDate->format("Y/m/d"));
 
 		$calendarData['title'] = $title;
+		$calendarData['nextMonth'] = new \DateTime($dateString);
+		$calendarData['nextMonth'] = $calendarData['nextMonth']->modify('next month')->format("Y-m-d");
+		$calendarData['lastMonth'] = new \DateTime($dateString);
+		$calendarData['lastMonth'] = $calendarData['lastMonth']->modify('last month')->format("Y-m-d");
+		$calendarData['currentMonth'] = new \DateTime($dateString);
+		$calendarData['currentMonth'] = $calendarData['currentMonth']->format("Y-m-d");
 		$calendarData['dateMap'] = $dateMap;
 		$this->set(compact('calendarData'));
 
@@ -121,7 +127,7 @@ class CalendarController extends AppController
 
 		$locations = $this->Locations->find("all", array(
 					"conditions" => array("day" => $date->format("w"))
-					));
+					))->order(['start_time' => 'ASC']);
 
 		$return = array();
 		foreach($scheduledLocations as $schedLoc) {

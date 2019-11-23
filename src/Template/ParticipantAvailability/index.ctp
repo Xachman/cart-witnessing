@@ -9,7 +9,8 @@
     </ul>
 </nav>
 <div class="participantAvailability index large-9 medium-8 columns content">
-    <h3><?= __('Participant Availability') ?></h3>
+	<h3><?= __('Participant Availability') ?></h3>
+	<a class="button tiny" href="/participant-availability">clear</a>
     <table cellpadding="0" cellspacing="0">
         <thead>
             <tr>
@@ -29,7 +30,7 @@
             foreach ($participantAvailability as $participantAvailability): ?>
             <tr>
                 <td><?= $this->Number->format($participantAvailability->id) ?></td>
-                <td><?= h($days[$participantAvailability->day])?></td>
+				<td><a href="/participant-availability?day=<?=$participantAvailability->day?>"><?= h($days[$participantAvailability->day])?></a></td>
                 <td><a href="/participants/view/<?=$participantAvailability->participant_id?>"><?= h($participants[$participantAvailability->participant_id])?></a></td>
                 <td><?= h($participantAvailability->start_time) ?></td>
                 <td><?= h($participantAvailability->end_time) ?></td>

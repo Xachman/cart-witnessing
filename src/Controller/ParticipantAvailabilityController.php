@@ -20,9 +20,17 @@ class ParticipantAvailabilityController extends AppController
     {
         $this->paginate = [
             'contain' => ['Participants']
-        ];
-        $participantAvailability = $this->paginate($this->ParticipantAvailability);
+		];
+		$urlQuery = $this->request->query("day");
+
+		$participantsQuery = $this->ParticipantAvailability;
+
+		if($urlQuery !=  null) {
+			$participantsQuery = $this->ParticipantAvailability->find('all')->where(['day' => $urlQuery]);
+		}
        
+		$participantAvailability = $this->paginate($participantsQuery);
+
         $participantsQuery = $this->ParticipantAvailability->Participants->find("all");
         $participants = array();
         foreach($participantsQuery as $participant) {

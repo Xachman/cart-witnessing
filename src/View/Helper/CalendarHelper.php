@@ -70,15 +70,8 @@ class CalendarHelper extends Helper {
 				<a href="/scheduled-locations/edit/<?= $schedule['id'] ?>?controller=calendar&action=month" >
 					<div class="participant">
 						<div class="name"><?= $schedule['participant'] ?></div>
-						<?php if($condense && isset($data['scheduled_locations'][$count+1])) {
-							$nextSchedule = $data['scheduled_locations'][$count+1];
-							
-							$isSame = ($schedule['start_time']->format("h:s A") == $nextSchedule['start_time']->format("h:s A") && $schedule['end_time']->format("h:s A") == $nextSchedule['end_time']->format("h:s A"));
-							if(!$isSame) { ?>
-						<div class="time"><?= $schedule['start_time']->format("h:s A"); ?> - <?= $schedule['end_time']->format("h:s A"); ?></div>
-						<?php }
-						 } else { ?>
-						<div class="time"><?= $schedule['start_time']->format("h:s A"); ?> - <?= $schedule['end_time']->format("h:s A"); ?></div>
+						<?php if(!$condense) { ?>
+							<div class="time"><?= $schedule['start_time']->format("h:s A"); ?> - <?= $schedule['end_time']->format("h:s A"); ?></div>
 						<?php } ?>
 					</div>
 				</a>
@@ -99,11 +92,14 @@ class CalendarHelper extends Helper {
 
 					</div>
 					<?=$this->renderScheduledLocations($data, $location->id, $condense);	?>
-					<?php if ($button) { ?>
-					<a class="button small"  href="/scheduled-locations/add/<?=$location->id?>/<?=$date->format("Y-m-d")?>?controller=calendar&action=month">
-						Add
-					</a>
-					<?php } ?>
+                    <div class="buttons">
+                        <?php if ($button) { ?>
+                            <a class="button tiny"  href="/scheduled-locations/add/<?=$location->id?>/<?=$date->format("Y-m-d")?>?controller=calendar&action=month">
+                                Add
+                            </a>
+                        <a class="button tiny" href="/scheduled-locations/generate/<?=$location->id?>/<?=$date->format("Y-m-d")?>">Generate</a>
+                        <?php } ?>
+                    </div>
 				</div>
 				<?php
 			}

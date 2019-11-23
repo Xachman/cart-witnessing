@@ -79,10 +79,11 @@ class ScheduledLocationsController extends AppController
             $locations[$location->id] = $location->name .' - '. $days[$location->day];
         }
         $participants = array();
-        foreach($this->ScheduledLocations->Participants->find('all') as $participant) {
+        foreach($this->ScheduledLocations->getAvailableParticipants($locationId, $selectedDate) as $participant) {
             $participants[$participant->id] =  $participant->first_name . ' ' .$participant->last_name;
         }
-        $this->set(compact('scheduledLocation', 'locations', 'participants','locationId', 'selectedDate'));
+        $selectedLocation = $this->ScheduledLocations->Locations->get($locationId);
+        $this->set(compact('scheduledLocation', 'locations', 'participants','locationId', 'selectedDate', 'selectedLocation'));
         $this->set('_serialize', ['scheduledLocation']);
     }
 
@@ -145,5 +146,6 @@ class ScheduledLocationsController extends AppController
         }
 
         return $this->redirect(['action' => 'index']);
-    }
+	}
+	
 }

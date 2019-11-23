@@ -45,6 +45,8 @@ $cakeDescription = 'CakePHP: the rapid development PHP framework';
             <div class="columns large-12 ctp-warning checks">
                 <a href="/participant-availability" class="button">Availability</a>
                 <a href="/participants" class="button">Participants</a>
+				<a href="/calendar/month/<?php echo date("Y-m-d") ?>" class="button">Schedule Month</a>
+				<a href="/emails" class="button">Email</a>
             </div>
         </div>
     </div>
