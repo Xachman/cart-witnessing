@@ -40,9 +40,21 @@ class AppController extends Controller
     public function initialize()
     {
         parent::initialize();
-
+        
+        $this->loadModel("Users");
         $this->loadComponent('RequestHandler');
         $this->loadComponent('Flash');
+        $this->loadComponent('Auth', [
+            'loginRedirect' => [
+                'controller' => 'Pages',
+                'action' => 'index'
+            ],
+            'logoutRedirect' => [
+                'controller' => 'Pages',
+                'action' => 'display',
+                'home'
+            ]
+        ]);
     }
 
     /**
@@ -57,6 +69,14 @@ class AppController extends Controller
             in_array($this->response->type(), ['application/json', 'application/xml'])
         ) {
             $this->set('_serialize', true);
+        }
+    }
+
+    public function beforeFilter(Event $event) {
+        if(!$this->Users->isUsers()) {
+            $this->Auth->allow(['action'=>'add','controller' => 'users']);
+            if($this->request->controller != 'Users' && $this->request->action != "add")
+                return $this->redirect(['controller' => 'users', 'action' => 'add']);
         }
     }
 }

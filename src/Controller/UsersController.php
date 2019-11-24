@@ -2,6 +2,7 @@
 namespace App\Controller;
 
 use App\Controller\AppController;
+use Cake\Validation\Validation;
 
 /**
  * Users Controller
@@ -107,5 +108,27 @@ class UsersController extends AppController
         }
 
         return $this->redirect(['action' => 'index']);
+    }
+
+    
+    public function login()
+    {
+        if ($this->request->is('post')) {
+            if (Validation::email($this->request->data['email'])) {
+                $this->Auth->config('authenticate', [
+                    'Form' => [
+                        'fields' => ['username' => 'email']
+                    ]
+                ]);
+                $this->Auth->constructAuthenticate();
+                $this->request->data['email'] = $this->request->data['email'];
+            }
+            $user = $this->Auth->identify();
+            if ($user) {
+                $this->Auth->setUser($user);
+                return $this->redirect($this->Auth->redirectUrl());
+            }
+            $this->Flash->error(__('Invalid username or password, try again'));
+        }
     }
 }

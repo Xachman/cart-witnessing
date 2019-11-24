@@ -76,4 +76,12 @@ class UsersTable extends Table
 
         return $rules;
     }
+
+    public function isUsers() {
+        $users = $this->find("all");
+        if($users->count() > 0) {
+            return true;
+        }
+        return false;
+    }
 }
