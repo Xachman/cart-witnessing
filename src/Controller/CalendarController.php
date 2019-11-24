@@ -30,6 +30,7 @@ class CalendarController extends AppController
 	private $Calendar;
 
 	public function initialize() {
+		parent::initialize();
 		$this->Calendar = new Calendar();		
 	}
 	/**
