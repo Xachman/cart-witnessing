@@ -61,6 +61,39 @@ class CalendarHelper extends Helper {
 			</div><?php
 	}
 
+	public function displaySelfScheduleCalendar($calendarData) {
+		echo $this->Html->script("calendar.js");
+		?>
+			<div class="calendar">
+			<div class="calendar-title"><?=$calendarData['title']?></div>
+			<div class="container">
+			<?php
+			$count = 0;
+		foreach($calendarData['dateMap'] as $dateKey => $currentData) {
+			if($count > 0 && $count % 7 == 0) { echo "</div><div class=\"container\">"; }
+			$dateArray  = explode("_", $dateKey);
+			$date = new \DateTime(implode("/", $dateArray));
+			?>	
+				<div class="day">
+				<div class="title"><?=$this->days[$date->format("w")]?> - <?=$date->format("j")?></div>
+
+<?php
+ 					$this->renderLocations($currentData, $date, true, true);	
+				?>
+				</div>
+
+				<?php
+				//		var_dump($date);
+				//		var_dump($current);
+
+				$count++;
+		}
+		?>
+			</div>
+			</div>
+			</div><?php
+	}
+
 	public function renderScheduledLocations($data, $id, $condense = false) {
 		if(isset($data['scheduled_locations'])) { 
 			$count = 0;
@@ -70,9 +103,6 @@ class CalendarHelper extends Helper {
 				<a href="/scheduled-locations/edit/<?= $schedule['id'] ?>?controller=calendar&action=month" >
 					<div class="participant">
 						<div class="name"><?= $schedule['participant'] ?></div>
-						<?php if(!$condense) { ?>
-							<div class="time"><?= $schedule['start_time']->format("h:s A"); ?> - <?= $schedule['end_time']->format("h:s A"); ?></div>
-						<?php } ?>
 					</div>
 				</a>
 			<?php
@@ -81,7 +111,7 @@ class CalendarHelper extends Helper {
 		}
 	}
 
-	public function renderLocations($data, $date, $button = true, $condense = false) {
+	public function renderLocations($data, $date, $button = true) {
  		if(isset($data['locations'])) {
 			foreach($data['locations'] as $location) {
 				?>
@@ -91,14 +121,19 @@ class CalendarHelper extends Helper {
 						<?=$location->start_time->format("g:ia");?> - <?=$location->end_time->format("g:ia");?>
 
 					</div>
-					<?=$this->renderScheduledLocations($data, $location->id, $condense);	?>
+					<?=$this->renderScheduledLocations($data, $location->id);	?>
                     <div class="buttons">
-                        <?php if ($button) { ?>
-                            <a class="button tiny"  href="/scheduled-locations/add/<?=$location->id?>/<?=$date->format("Y-m-d")?>?controller=calendar&action=month">
-                                Add
-                            </a>
-                        <a class="button tiny" href="/scheduled-locations/generate/<?=$location->id?>/<?=$date->format("Y-m-d")?>">Generate</a>
-                        <?php } ?>
+						<?php if ($button) { ?>
+							<?php if (isset($participant)) { ?>
+								<a class="button tiny"  href="/scheduled-locations/self-add/<?=$location->id?>/<?=$date->format("Y-m-d")/$participant->id?>?controller=calendar&action=month">
+									Add
+								</a>
+                       		<?php }else{ ?>
+								<a class="button tiny"  href="/scheduled-locations/add/<?=$location->id?>/<?=$date->format("Y-m-d")?>?controller=calendar&action=month">
+									Add
+								</a>
+                       		<?php } ?>
+                       <?php } ?>
                     </div>
 				</div>
 				<?php
