@@ -16,6 +16,8 @@ namespace App\Controller;
 
 use App\Controller\AppController;
 use App\Model\Calendar;
+use Cake\Event\Event;
+use Cake\Validation\Validation;
 
 /**
  * Application Controller
@@ -53,7 +55,11 @@ class CalendarController extends AppController
 		$this->set(compact('dateMap'));
 
 	}
-
+    public function beforeFilter(Event $event)
+    {
+        // allow only login, forgotpassword
+         $this->Auth->allow(['selfSchedule']);
+    }
 	public function month($dateString = "") {
 		$date = new \DateTime($dateString);
 		$date->setDate($date->format("Y"), $date->format("m"), 1);
@@ -86,6 +92,21 @@ class CalendarController extends AppController
 	}
 
 	public function selfSchedule($dateString = "") {
+		$this->loadModel('Participants');
+		$session = $this->request->session();
+		if($session->read('self_checkout_paricipant_id')) {
+			$participant = $this->Participants->get($session->read('self_checkout_paricipant_id'));
+		}
+		if ($this->request->is('post')) {
+			$email = $this->request->data['email'];
+			if (Validation::email($email)) {
+				$participant = $this->Participants->find()->where(["email" => $email])->first();
+				$session->write('self_checkout_paricipant_id', $participant->id);
+				if(!$participant) {
+					$this->Flash->error('Email not found');
+				}
+			}
+		}
 		$date = new \DateTime($dateString);
 		$date->setDate($date->format("Y"), $date->format("m"), 1);
 		$title = $date->format("F - Y");
@@ -103,7 +124,7 @@ class CalendarController extends AppController
 		$calendarData['currentMonth'] = new \DateTime($dateString);
 		$calendarData['currentMonth'] = $calendarData['currentMonth']->format("Y-m-d");
 		$calendarData['dateMap'] = $dateMap;
-		$this->set(compact('calendarData'));
+		$this->set(compact('calendarData', 'participant'));
 	}
 
 	private function getCalendarData($startDateStr = "", $endDateStr = "" ) {

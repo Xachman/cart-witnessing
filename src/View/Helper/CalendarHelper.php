@@ -61,7 +61,7 @@ class CalendarHelper extends Helper {
 			</div><?php
 	}
 
-	public function displaySelfScheduleCalendar($calendarData) {
+	public function displaySelfScheduleCalendar($calendarData, $participant) {
 		echo $this->Html->script("calendar.js");
 		?>
 			<div class="calendar">
@@ -78,7 +78,7 @@ class CalendarHelper extends Helper {
 				<div class="title"><?=$this->days[$date->format("w")]?> - <?=$date->format("j")?></div>
 
 <?php
- 					$this->renderLocations($currentData, $date, true, true);	
+ 					$this->renderLocations($currentData, $date, true, $participant);	
 				?>
 				</div>
 
@@ -94,7 +94,7 @@ class CalendarHelper extends Helper {
 			</div><?php
 	}
 
-	public function renderScheduledLocations($data, $id, $condense = false) {
+	public function renderScheduledLocations($data, $id) {
 		if(isset($data['scheduled_locations'])) { 
 			$count = 0;
 			foreach($data['scheduled_locations'] as $schedule) { 
@@ -111,7 +111,7 @@ class CalendarHelper extends Helper {
 		}
 	}
 
-	public function renderLocations($data, $date, $button = true) {
+	public function renderLocations($data, $date, $button = true, $participant = null) {
  		if(isset($data['locations'])) {
 			foreach($data['locations'] as $location) {
 				?>
@@ -125,7 +125,7 @@ class CalendarHelper extends Helper {
                     <div class="buttons">
 						<?php if ($button) { ?>
 							<?php if (isset($participant)) { ?>
-								<a class="button tiny"  href="/scheduled-locations/self-add/<?=$location->id?>/<?=$date->format("Y-m-d")/$participant->id?>?controller=calendar&action=month">
+								<a class="button tiny"  href="/scheduled-locations/self-add/<?=$location->id?>/<?=$date->format("Y-m-d")?>/<?=$participant->id?>?controller=calendar&action=month">
 									Add
 								</a>
                        		<?php }else{ ?>
