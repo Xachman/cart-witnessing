@@ -101,9 +101,10 @@ class CalendarController extends AppController
 			$email = $this->request->data['email'];
 			if (Validation::email($email)) {
 				$participant = $this->Participants->find()->where(["email" => $email])->first();
-				$session->write('self_checkout_paricipant_id', $participant->id);
 				if(!$participant) {
 					$this->Flash->error('Email not found');
+				}else{
+					$session->write('self_checkout_paricipant_id', $participant->id);
 				}
 			}
 		}

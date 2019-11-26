@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Controller\AppController;
+use Cake\Event\Event;
 
 /**
  * ScheduledLocations Controller
@@ -11,7 +12,11 @@ use App\Controller\AppController;
  */
 class ScheduledLocationsController extends AppController
 {
-
+    public function beforeFilter(Event $event)
+    {
+        // allow only login, forgotpassword
+         $this->Auth->allow(['selfAdd']);
+    }
     /**
      * Index method
      *
@@ -86,7 +91,16 @@ class ScheduledLocationsController extends AppController
         $this->set(compact('scheduledLocation', 'locations', 'participants','locationId', 'selectedDate', 'selectedLocation'));
         $this->set('_serialize', ['scheduledLocation']);
     }
-
+    public function selfAdd($locationId, $selectedDate, $participantId) {
+        $session = $this->request->session();
+		if ($this->request->is('post')) {
+		    $compId = $session->read('self_checkout_paricipant_id');
+			if ($compId != $participantId) {
+                $this->Flash->error('ID mismatch');
+                return $this->redirect(['controller' => 'Calendar', 'action' => 'selfSchedule']);
+			}
+		}
+    }
     /**
      * Edit method
      *

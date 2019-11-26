@@ -18,7 +18,7 @@ use Cake\View\View;
 
 class CalendarHelper extends Helper {
 	private $days = array("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday");
-	public $helpers = array('Html');
+	public $helpers = array('Html', 'Form');
 
 	// initialize() hook is available since 3.2. For prior versions you can
 	// override the constructor if required.
@@ -125,9 +125,17 @@ class CalendarHelper extends Helper {
                     <div class="buttons">
 						<?php if ($button) { ?>
 							<?php if (isset($participant)) { ?>
-								<a class="button tiny"  href="/scheduled-locations/self-add/<?=$location->id?>/<?=$date->format("Y-m-d")?>/<?=$participant->id?>?controller=calendar&action=month">
-									Add
-								</a>
+								<?=$this->Form->postLink('Add',[
+									'controller' => 'ScheduledLocations',
+									'action' => 'selfAdd',
+									$location->id,
+									$date->format("Y-m-d"),
+									$participant->id
+								],
+								[
+									'confirm' => "Schedule $location->name on ".$date->format('M d')."?",
+									'class' => 'button tiny'
+								]);?>
                        		<?php }else{ ?>
 								<a class="button tiny"  href="/scheduled-locations/add/<?=$location->id?>/<?=$date->format("Y-m-d")?>?controller=calendar&action=month">
 									Add
