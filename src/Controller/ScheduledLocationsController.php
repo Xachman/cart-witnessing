@@ -91,14 +91,14 @@ class ScheduledLocationsController extends AppController
         $this->set(compact('scheduledLocation', 'locations', 'participants','locationId', 'selectedDate', 'selectedLocation'));
         $this->set('_serialize', ['scheduledLocation']);
     }
-    public function selfAdd($locationId, $selectedDate, $participantId) {
+    public function selfAdd($locationId, $selectedDate) {
         $session = $this->request->session();
 		if ($this->request->is('post')) {
-		    $compId = $session->read('self_checkout_paricipant_id');
-			if ($compId != $participantId) {
-                $this->Flash->error('ID mismatch');
+		    $participantId = $session->read('self_checkout_paricipant_id');
+			if (!$participantId) {
+                $this->Flash->error('No ID');
                 return $this->redirect(['controller' => 'Calendar', 'action' => 'selfSchedule']);
-			}
+            }
 		}
     }
     /**

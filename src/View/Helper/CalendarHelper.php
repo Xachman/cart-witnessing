@@ -129,8 +129,7 @@ class CalendarHelper extends Helper {
 									'controller' => 'ScheduledLocations',
 									'action' => 'selfAdd',
 									$location->id,
-									$date->format("Y-m-d"),
-									$participant->id
+									$date->format("Y-m-d")
 								],
 								[
 									'confirm' => "Schedule $location->name on ".$date->format('M d')."?",
