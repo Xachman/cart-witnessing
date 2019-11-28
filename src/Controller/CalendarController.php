@@ -125,6 +125,7 @@ class CalendarController extends AppController
 		$calendarData['currentMonth'] = new \DateTime($dateString);
 		$calendarData['currentMonth'] = $calendarData['currentMonth']->format("Y-m-d");
 		$calendarData['dateMap'] = $dateMap;
+		$calendarData['participant_id'] = $participant->id;
 		$this->set(compact('calendarData', 'participant'));
 	}
 
@@ -178,7 +179,8 @@ class CalendarController extends AppController
 						"start_time" 	 => $schedLoc->start_time,
 						"end_time"      => $schedLoc->end_time,
 						"id"        	=> $schedLoc->id,
-						"location_id"  => $schedLoc->location_id
+						"location_id"  => $schedLoc->location_id,
+						'participant_id' => $participant->id
 						//	"locations" 	=> $this->getLocationsByDate($schedLoc->start_date)
 						);
 

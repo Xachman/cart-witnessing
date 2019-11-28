@@ -18,7 +18,7 @@ use Cake\View\View;
 
 class CalendarHelper extends Helper {
 	private $days = array("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday");
-	public $helpers = array('Html', 'Form');
+	public $helpers = array('Html', 'Form', 'Time');
 
 	// initialize() hook is available since 3.2. For prior versions you can
 	// override the constructor if required.
@@ -100,11 +100,24 @@ class CalendarHelper extends Helper {
 			foreach($data['scheduled_locations'] as $schedule) { 
 				if($id != $schedule['location_id']) continue;
 				?>
-				<a href="/scheduled-locations/edit/<?= $schedule['id'] ?>?controller=calendar&action=month" >
+						<?php
+						if($data['participant_id'] == $schedule['participant_id']) {
+						$this->Form->postLink($schedule['participant'],[
+							'controller' => 'ScheduledLocations',
+							'action' => 'selfDelete',
+							'?' => [
+								'controller' => 'calendar',
+								'action' => 'selfSchedule'
+							],
+						],
+						[
+							'confirm' => "Delete Schedule $location->name on ".$date->format('M d')."?",
+							'class' => 'button tiny'
+						]);
+						}?>
 					<div class="participant">
 						<div class="name"><?= $schedule['participant'] ?></div>
 					</div>
-				</a>
 			<?php
 			$count++;
 			}
@@ -128,12 +141,33 @@ class CalendarHelper extends Helper {
 								<?=$this->Form->postLink('Add',[
 									'controller' => 'ScheduledLocations',
 									'action' => 'selfAdd',
+									'?' => [
+										'controller' => 'calendar',
+										'action' => 'selfSchedule'
+									],
 									$location->id,
 									$date->format("Y-m-d")
 								],
 								[
 									'confirm' => "Schedule $location->name on ".$date->format('M d')."?",
-									'class' => 'button tiny'
+									'class' => 'button tiny',
+									'data' => [
+										'location_id' => $location->id,
+										'schedule_date' => [
+											'year' => $date->format('Y'),
+											'month' => $date->format('m'),
+											'day' => $date->format('j')
+										],
+										'start_time' => [ 
+											'hour' => $this->Time->format($location->start_time, 'HH'),
+											'minute' => $this->Time->format($location->start_time, 'mm'),
+										],
+										'end_time' => [ 
+											'hour' => $this->Time->format($location->end_time, 'HH'),
+											'minute' => $this->Time->format($location->end_time, 'mm'),
+										],
+
+									]
 								]);?>
                        		<?php }else{ ?>
 								<a class="button tiny"  href="/scheduled-locations/add/<?=$location->id?>/<?=$date->format("Y-m-d")?>?controller=calendar&action=month">

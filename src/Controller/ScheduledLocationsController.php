@@ -87,7 +87,9 @@ class ScheduledLocationsController extends AppController
         foreach($this->ScheduledLocations->getAvailableParticipants($locationId, $selectedDate) as $participant) {
             $participants[$participant->id] =  $participant->first_name . ' ' .$participant->last_name;
         }
-        $selectedLocation = $this->ScheduledLocations->Locations->get($locationId);
+        if((int) $locationId) {
+            $selectedLocation = $this->ScheduledLocations->Locations->get($locationId);
+        }
         $this->set(compact('scheduledLocation', 'locations', 'participants','locationId', 'selectedDate', 'selectedLocation'));
         $this->set('_serialize', ['scheduledLocation']);
     }
@@ -99,7 +101,11 @@ class ScheduledLocationsController extends AppController
                 $this->Flash->error('No ID');
                 return $this->redirect(['controller' => 'Calendar', 'action' => 'selfSchedule']);
             }
-		}
+        }
+        $this->request->data['participant_id'] = $participantId;
+        $this->add();
+        return $this->redirect(['controller' => 'Calendar', 'action' => 'selfSchedule']);
+
     }
     /**
      * Edit method
