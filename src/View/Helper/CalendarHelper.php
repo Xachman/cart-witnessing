@@ -94,30 +94,37 @@ class CalendarHelper extends Helper {
 			</div><?php
 	}
 
-	public function renderScheduledLocations($data, $id) {
+	public function renderScheduledLocations($data, $id, $participant, $date) {
 		if(isset($data['scheduled_locations'])) { 
 			$count = 0;
 			foreach($data['scheduled_locations'] as $schedule) { 
 				if($id != $schedule['location_id']) continue;
 				?>
 						<?php
-						if($data['participant_id'] == $schedule['participant_id']) {
-						$this->Form->postLink($schedule['participant'],[
-							'controller' => 'ScheduledLocations',
-							'action' => 'selfDelete',
-							'?' => [
-								'controller' => 'calendar',
-								'action' => 'selfSchedule'
+						if(isset($participant) && $participant->id == $schedule['participant_id']) {?>
+						<div class="participant">
+							<div class="name"><?= $schedule['participant'] ?></div>
+							<?php
+							echo $this->Form->postLink('Delete',[
+								'controller' => 'ScheduledLocations',
+								'action' => 'selfDelete',
+								$schedule['id'],
+								$date->format("Y-m-d"),
+								'?' => [
+									'controller' => 'calendar',
+									'action' => 'selfSchedule'
+								],
 							],
-						],
-						[
-							'confirm' => "Delete Schedule $location->name on ".$date->format('M d')."?",
-							'class' => 'button tiny'
-						]);
-						}?>
+							[
+								'confirm' => "Delete schedule on ".$date->format('M d')."?",
+								'class' => 'button tiny'
+							]);?>
+						</div>
+						<?php }else{?>
 					<div class="participant">
 						<div class="name"><?= $schedule['participant'] ?></div>
 					</div>
+						<?php } ?>
 			<?php
 			$count++;
 			}
@@ -134,7 +141,7 @@ class CalendarHelper extends Helper {
 						<?=$location->start_time->format("g:ia");?> - <?=$location->end_time->format("g:ia");?>
 
 					</div>
-					<?=$this->renderScheduledLocations($data, $location->id);	?>
+					<?=$this->renderScheduledLocations($data, $location->id, $participant, $date);	?>
                     <div class="buttons">
 						<?php if ($button) { ?>
 							<?php if (isset($participant)) { ?>

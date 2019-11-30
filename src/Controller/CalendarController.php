@@ -125,7 +125,8 @@ class CalendarController extends AppController
 		$calendarData['currentMonth'] = new \DateTime($dateString);
 		$calendarData['currentMonth'] = $calendarData['currentMonth']->format("Y-m-d");
 		$calendarData['dateMap'] = $dateMap;
-		$calendarData['participant_id'] = $participant->id;
+		if(isset($participant))
+			$calendarData['participant_id'] = $participant->id;
 		$this->set(compact('calendarData', 'participant'));
 	}
 

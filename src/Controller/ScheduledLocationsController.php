@@ -103,9 +103,21 @@ class ScheduledLocationsController extends AppController
             }
         }
         $this->request->data['participant_id'] = $participantId;
-        $this->add();
+        $this->add($locationId, $selectedDate);
         return $this->redirect(['controller' => 'Calendar', 'action' => 'selfSchedule']);
 
+    }
+    public function selfDelete($id, $date) {
+        $session = $this->request->session();
+		if ($this->request->is('post')) {
+		    $participantId = $session->read('self_checkout_paricipant_id');
+			if (!$participantId) {
+                $this->Flash->error('No ID');
+                return $this->redirect(['controller' => 'Calendar', 'action' => 'selfSchedule']);
+            }
+        }
+        $this->delete($id, $date);
+        return $this->redirect(['controller' => 'Calendar', 'action' => 'selfSchedule']);
     }
     /**
      * Edit method
@@ -155,7 +167,7 @@ class ScheduledLocationsController extends AppController
      * @return \Cake\Network\Response|null Redirects to index.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function delete($id = null)
+    public function delete($id = null, $date = null)
     {
         $this->request->allowMethod(['post', 'delete']);
         $scheduledLocation = $this->ScheduledLocations->get($id);
@@ -164,6 +176,12 @@ class ScheduledLocationsController extends AppController
         } else {
             $this->Flash->error(__('The scheduled location could not be deleted. Please, try again.'));
         }
+
+		$queryAction = $this->request->query["action"];
+		$queryController = $this->request->query["controller"];
+        if(isset($queryAction) && isset($queryController)) {
+            return $this->redirect(["controller" => $queryController, "action" => $queryAction, $date]);
+        }        
 
         return $this->redirect(['action' => 'index']);
 	}

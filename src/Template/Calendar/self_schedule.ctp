@@ -1,8 +1,8 @@
 <?php if (isset($participant)) { ?>
 
 <div class="calendar_nav">
-<a href="/calendar/month/<?=$calendarData['lastMonth'] ?>" class="last-month nav-button">Last Month</a>
-<a href="/calendar/month/<?=$calendarData['nextMonth']?>" class="next-month nav-button">Next Month</a>
+<a href="/calendar/self-schedule/<?=$calendarData['lastMonth'] ?>" class="last-month nav-button">Last Month</a>
+<a href="/calendar/self-schedule/<?=$calendarData['nextMonth']?>" class="next-month nav-button">Next Month</a>
 </div>
 <div><?=$participant->first_name?> <?=$participant->last_name?></div>
 <?php
