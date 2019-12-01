@@ -51,7 +51,7 @@ class CalendarController extends AppController
 	{
 		$date = new \DateTime($dateString);
 		var_dump($date);
-		$dateMap = $this->getCalendarData($date->format("Y/m/1"), $date->format("Y/m/t"));
+		$dateMap = $this->Calendar->getCalendarData($date->format("Y/m/1"), $date->format("Y/m/t"));
 		$this->set(compact('dateMap'));
 
 	}
@@ -68,7 +68,7 @@ class CalendarController extends AppController
 		$startDate = new \DateTime(date("Y/m/d", strtotime("-".$date->format("w")." days", strtotime($date->format("Y/m/1")))));
 		$date->setDate($date->format("Y"), $date->format("m"), $date->format("t"));
 		$endDate = new \DateTime(date("Y/m/d", strtotime("+".(6-$date->format("w"))." days", strtotime($date->format("Y/m/d")))));
-		$dateMap = $this->getCalendarData($startDate->format("Y/m/d"), $endDate->format("Y/m/d"));
+		$dateMap = $this->Calendar->getCalendarData($startDate->format("Y/m/d"), $endDate->format("Y/m/d"));
 
 		$calendarData['title'] = $title;
 		$calendarData['nextMonth'] = new \DateTime($dateString);
@@ -115,7 +115,7 @@ class CalendarController extends AppController
 		$startDate = new \DateTime(date("Y/m/d", strtotime("-".$date->format("w")." days", strtotime($date->format("Y/m/1")))));
 		$date->setDate($date->format("Y"), $date->format("m"), $date->format("t"));
 		$endDate = new \DateTime(date("Y/m/d", strtotime("+".(6-$date->format("w"))." days", strtotime($date->format("Y/m/d")))));
-		$dateMap = $this->getCalendarData($startDate->format("Y/m/d"), $endDate->format("Y/m/d"));
+		$dateMap = $this->Calendar->getCalendarData($startDate->format("Y/m/d"), $endDate->format("Y/m/d"));
 
 		$calendarData['title'] = $title;
 		$calendarData['nextMonth'] = new \DateTime($dateString);
@@ -130,25 +130,6 @@ class CalendarController extends AppController
 		$this->set(compact('calendarData', 'participant'));
 	}
 
-	private function getCalendarData($startDateStr = "", $endDateStr = "" ) {
-
-		$this->loadModel("ScheduledLocations");
-
-		$startDate = new \DateTime($startDateStr);
-		$endDate = new \DateTime($endDateStr);
-		$incDate = new \DateTime($startDate->format("Y/m/d"));
-
-		$scheduledLocations = $this->ScheduledLocations->getRange( $startDate, $endDate);
-		$scheduledLocationsCount = 	$this->ScheduledLocations->getParticipantsInRange($startDate, $endDate);	//var_dump($scheduledLocationsCount);
-		$dateMap = array();
-		while($incDate->getTimestamp() <= $endDate->getTimestamp()) {
-
-			$dateMap[$incDate->format("Y_m_d")] = $this->getDayData($incDate, $scheduledLocations);
-			$incDate->setDate($incDate->format("Y"), $incDate->format("m"), $incDate->format("d") +1);
-		}
-
-		return $dateMap;
-	}
 
 	private function getLocationsByDate($dateString) {
 		$locations = $this->Locations->find("all");
@@ -162,38 +143,6 @@ class CalendarController extends AppController
 		return $return;
 	}
 
-	private function getDayData($date, $scheduledLocations) {
-
-		$this->loadModel("Participants");
-		$this->loadModel("Locations");
-
-		$locations = $this->Locations->find("all", array(
-					"conditions" => array("day" => $date->format("w"))
-					))->order(['start_time' => 'ASC']);
-
-		$return = array();
-		foreach($scheduledLocations as $schedLoc) {
-			if($date->format("Y/m/d") == $schedLoc->schedule_date->format("Y/m/d")) {
-				$participant = $this->Participants->get($schedLoc->participant_id);
-				$return["scheduled_locations"][] = array(
-						"participant" 	=> $participant->first_name." ".$participant->last_name,
-						"start_time" 	 => $schedLoc->start_time,
-						"end_time"      => $schedLoc->end_time,
-						"id"        	=> $schedLoc->id,
-						"location_id"  => $schedLoc->location_id,
-						'participant_id' => $participant->id
-						//	"locations" 	=> $this->getLocationsByDate($schedLoc->start_date)
-						);
-
-			}
-		}
-		foreach($locations as $location) {
-			$return["locations"][] = $location; 
-		}
-
-		return $return;
-
-	}
 
 
 
