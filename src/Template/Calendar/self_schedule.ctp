@@ -5,6 +5,7 @@
 <a href="/calendar/self-schedule/<?=$calendarData['nextMonth']?>" class="next-month nav-button">Next Month</a>
 </div>
 <div><?=$participant->first_name?> <?=$participant->last_name?></div>
+<div id="fullCalendar"></div>
 <?php
 $this->Calendar->displaySelfScheduleCalendar($calendarData, $participant);
 }else{
