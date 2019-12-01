@@ -14,20 +14,6 @@ class Calendar {
         $this->Participants = TableRegistry::get('Participants');
     }
 
-    public function mapParticipantsMonth($startDateStr, $endDateStr) {
-        $startDate = new \DateTime($startDateStr);
-        $endDate = new \DateTime($endDateStr);
-        $incDate = new \DateTime($startDate->format("Y/m/d"));
-
-        $scheduledLocations = $this->ScheduledLocations->getRange( $startDate, $endDate);
-        $scheduledLocationsCount = 	$this->ScheduledLocations->getParticipantsInRange($startDate, $endDate);	//var_dump($scheduledLocationsCount);
-        $dateMap = array();
-        while($incDate->getTimestamp() <= $endDate->getTimestamp()) {
-
-          $dateMap[$incDate->format("Y_m_d")] = $this->getDayData($incDate, $scheduledLocations);
-          $incDate->setDate($incDate->format("Y"), $incDate->format("m"), $incDate->format("d") +1);
-        }
-    }
 
     public function getCalendarData($startDateStr = "", $endDateStr = "" ) {
 
