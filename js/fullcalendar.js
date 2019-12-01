@@ -7,11 +7,17 @@ document.addEventListener('DOMContentLoaded', function() {
   var calendar = new Calendar(calendarEl, {
     plugins: [ dayGridPlugin ],
     defaultView: 'dayGridMonth',
-    events: [{
-      title: 'test',
-      start: '2019-12-03',
-      end: '2019-12-03',
-    }]
+    events:  (date, successCallback, failureCallback) => {
+      var startDate = date.start;
+      var endDate = date.end;
+      $.ajax({
+        url: '/calendar/full-calendar-data/'+startDate.getFullYear()+"-"+(startDate.getMonth()+1)+"-"+startDate.getDate()+'/'+endDate.getFullYear()+"-"+(endDate.getMonth()+1)+"-"+endDate.getDate(),
+        datatType: 'json',
+        success: function(data) {
+          successCallback(data);
+        }
+      })
+    } 
   });
 
   calendar.render();

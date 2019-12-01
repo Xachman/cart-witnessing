@@ -1,7 +1,9 @@
 <?php
 namespace App\Model;
-use Cake\ORM\TableRegistry;
 
+use Cake\I18n\Time;
+use Cake\ORM\TableRegistry;
+use Cake\View\Helper\TimeHelper;
 
 class Calendar {
     private $Locations;
@@ -62,5 +64,46 @@ class Calendar {
 
 		return $return;
 
-	}
+    }
+    
+    public function getFullCalendarData($startDateStr = "", $endDateStr = "") {
+        $data = $this->getCalendarData($startDateStr, $endDateStr);
+
+        $results = [];
+        foreach($data as $date => $value ) {
+            if(!isset($value['locations']))
+                continue;
+            foreach($value['locations'] as $location) {
+                $result = [
+                    "title" => $location->name,
+                    "start" => $this->keyDateStrToDateStr($date)."T". $location->start_time->format("H:i:s"),
+                    "end" => $this->keyDateStrToDateStr($date)."T". $location->end_time->format("H:i:s"),
+                    ""
+                ];
+                if(!isset($value['scheduled_locations'])) {
+                    $results[] = $result;
+                    continue;
+                }
+
+                foreach($value['scheduled_locations'] as $schedLoc) {
+                    if($schedLoc['location_id'] == $location->id) {
+                        $result['title'] .= "\n".$schedLoc['participant'];
+                    }
+                }
+                $results[] = $result;
+            }
+        }
+
+        return $results;
+
+    }
+
+    private function searchResultForUnique($result) {
+
+    }
+
+    private function keyDateStrToDateStr($keyDateStr) {
+        $dateSplit = explode("_", $keyDateStr);
+        return $dateSplit[0]."-".$dateSplit[1]."-".$dateSplit[2];
+    }
 }

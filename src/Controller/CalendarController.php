@@ -58,7 +58,7 @@ class CalendarController extends AppController
     public function beforeFilter(Event $event)
     {
         // allow only login, forgotpassword
-         $this->Auth->allow(['selfSchedule']);
+         $this->Auth->allow(['selfSchedule', 'fullCalendarData']);
     }
 	public function month($dateString = "") {
 		$date = new \DateTime($dateString);
@@ -130,7 +130,26 @@ class CalendarController extends AppController
 		$this->set(compact('calendarData', 'participant'));
 	}
 
+	public function fullCalendarData($startDate, $endDate) {
+		$this->validateParticipant();
+		$this->set([
+			'data' => $this->Calendar->getFullCalendarData($startDate, $endDate),
+			'_serialize' => 'data',
+		]);
+		return $this->RequestHandler->renderAs($this, "json");
+	}
+	private function validateParticipant() {
 
+		$this->loadModel('Participants');
+		$session = $this->request->session();
+		if($session->read('self_checkout_paricipant_id')) {
+			$participant = $this->Participants->get($session->read('self_checkout_paricipant_id'));
+		}
+		if(!isset($participant)) {
+			$this->Flash->error('Please enter email');
+            return $this->redirect(['action' => 'selfSchedule']);
+		}	
+	}
 	private function getLocationsByDate($dateString) {
 		$locations = $this->Locations->find("all");
 		$targetDate = new \DateTime($dateString);

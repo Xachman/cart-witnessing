@@ -61,6 +61,15 @@ class CalendarHelper extends Helper {
 			</div><?php
 	}
 
+	public function displayFullCalendar() {
+		echo $this->Html->script("fullcalendar.js");
+		echo $this->Html->css('fullcalendar');
+		echo $this->Html->css('fullcalendar-daygrid');
+		?>
+		<div id="fullCalendar"></div>
+		<?php
+
+	}
 	public function displaySelfScheduleCalendar($calendarData, $participant) {
 		//echo $this->Html->script("calendar.js");
 		echo $this->Html->script("fullcalendar.js");
