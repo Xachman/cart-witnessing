@@ -15,7 +15,7 @@ class ScheduledLocationsController extends AppController
     public function beforeFilter(Event $event)
     {
         // allow only login, forgotpassword
-         $this->Auth->allow(['selfAdd']);
+         $this->Auth->allow(['selfAdd', 'selfDelete']);
     }
     /**
      * Index method
@@ -101,9 +101,9 @@ class ScheduledLocationsController extends AppController
                 $this->Flash->error('No ID');
                 return $this->redirect(['controller' => 'Calendar', 'action' => 'selfSchedule']);
             }
+            $this->request->data['participant_id'] = $participantId;
+            $this->add($locationId, $selectedDate);
         }
-        $this->request->data['participant_id'] = $participantId;
-        $this->add($locationId, $selectedDate);
         return $this->redirect(['controller' => 'Calendar', 'action' => 'selfSchedule']);
 
     }
@@ -115,8 +115,8 @@ class ScheduledLocationsController extends AppController
                 $this->Flash->error('No ID');
                 return $this->redirect(['controller' => 'Calendar', 'action' => 'selfSchedule']);
             }
+            $this->delete($id, $date);
         }
-        $this->delete($id, $date);
         return $this->redirect(['controller' => 'Calendar', 'action' => 'selfSchedule']);
     }
     /**

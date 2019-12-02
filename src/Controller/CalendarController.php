@@ -131,9 +131,9 @@ class CalendarController extends AppController
 	}
 
 	public function fullCalendarData($startDate, $endDate) {
-		$this->validateParticipant();
+		$participant = $this->validateParticipant();
 		$this->set([
-			'data' => $this->Calendar->getFullCalendarData($startDate, $endDate),
+			'data' => $this->Calendar->getFullCalendarData($startDate, $endDate, $participant),
 			'_serialize' => 'data',
 		]);
 		return $this->RequestHandler->renderAs($this, "json");
@@ -149,6 +149,7 @@ class CalendarController extends AppController
 			$this->Flash->error('Please enter email');
             return $this->redirect(['action' => 'selfSchedule']);
 		}	
+		return $participant;
 	}
 	private function getLocationsByDate($dateString) {
 		$locations = $this->Locations->find("all");

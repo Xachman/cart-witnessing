@@ -65,6 +65,7 @@ class CalendarHelper extends Helper {
 		echo $this->Html->script("fullcalendar.js");
 		echo $this->Html->css('fullcalendar');
 		echo $this->Html->css('fullcalendar-daygrid');
+		echo $this->Html->css('fullcalendar-list');
 		?>
 		<div id="fullCalendar"></div>
 		<?php

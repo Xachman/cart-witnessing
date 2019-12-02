@@ -3,7 +3,8 @@ namespace App\Model;
 
 use Cake\I18n\Time;
 use Cake\ORM\TableRegistry;
-use Cake\View\Helper\TimeHelper;
+use Cake\View\Helper\UrlHelper;
+use Cake\View\View;
 
 class Calendar {
     private $Locations;
@@ -66,10 +67,11 @@ class Calendar {
 
     }
     
-    public function getFullCalendarData($startDateStr = "", $endDateStr = "") {
+    public function getFullCalendarData($startDateStr = "", $endDateStr = "", $participant) {
         $data = $this->getCalendarData($startDateStr, $endDateStr);
 
         $results = [];
+        $urlHelper = new UrlHelper(new View);
         foreach($data as $date => $value ) {
             if(!isset($value['locations']))
                 continue;
@@ -77,22 +79,40 @@ class Calendar {
                 $result = [
                     "title" => $location->name,
                     "start" => $this->keyDateStrToDateStr($date)."T". $location->start_time->format("H:i:s"),
-                    "end" => $this->keyDateStrToDateStr($date)."T". $location->end_time->format("H:i:s"),
-                    ""
+                    "end" => $this->keyDateStrToDateStr($date)."T". $location->end_time->format("H:i:s")
                 ];
+                $result['scheduled'] = false;
+                $result['location_name'] = $location->name;
+                $result['location_id'] = $location->id;
+                $result['url'] = $urlHelper->build([
+                    "controller" => "ScheduledLocations",
+                    "action" => "selfAdd",
+                    $location->id,
+                    $this->keyDateStrToDateStr($date)
+                ]);
                 if(!isset($value['scheduled_locations'])) {
                     $results[] = $result;
                     continue;
                 }
-
                 foreach($value['scheduled_locations'] as $schedLoc) {
                     if($schedLoc['location_id'] == $location->id) {
                         $result['title'] .= "\n".$schedLoc['participant'];
+                        if($participant->id == $schedLoc['participant_id']) {
+                            $result['scheduled'] = true;
+                            $result['backgroundColor'] = 'green';
+                            $result['url'] = $urlHelper->build([
+                                "controller" => "ScheduledLocations",
+                                "action" => "selfDelete",
+                                $schedLoc['id'],
+                                $this->keyDateStrToDateStr($date)
+                            ]);
+                        }
                     }
                 }
                 $results[] = $result;
             }
         }
+        
 
         return $results;
 

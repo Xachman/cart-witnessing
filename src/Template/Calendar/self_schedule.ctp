@@ -1,8 +1,10 @@
 <?php if (isset($participant)) { ?>
 
-<div><?=$participant->first_name?> <?=$participant->last_name?></div>
+<div class="content">
+    <div><?=$participant->first_name?> <?=$participant->last_name?></div>
+    <?=$this->Calendar->displayFullCalendar(); ?>
+</div>
 <?php
-$this->Calendar->displayFullCalendar();
 }else{
     ?>
 <div class="users form columns medium-offset-3 medium-6">
