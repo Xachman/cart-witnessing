@@ -108,26 +108,7 @@ class CalendarController extends AppController
 				}
 			}
 		}
-		$date = new \DateTime($dateString);
-		$date->setDate($date->format("Y"), $date->format("m"), 1);
-		$title = $date->format("F - Y");
-		$calendarData = array();
-		$startDate = new \DateTime(date("Y/m/d", strtotime("-".$date->format("w")." days", strtotime($date->format("Y/m/1")))));
-		$date->setDate($date->format("Y"), $date->format("m"), $date->format("t"));
-		$endDate = new \DateTime(date("Y/m/d", strtotime("+".(6-$date->format("w"))." days", strtotime($date->format("Y/m/d")))));
-		$dateMap = $this->Calendar->getCalendarData($startDate->format("Y/m/d"), $endDate->format("Y/m/d"));
-
-		$calendarData['title'] = $title;
-		$calendarData['nextMonth'] = new \DateTime($dateString);
-		$calendarData['nextMonth'] = $calendarData['nextMonth']->modify('next month')->format("Y-m-d");
-		$calendarData['lastMonth'] = new \DateTime($dateString);
-		$calendarData['lastMonth'] = $calendarData['lastMonth']->modify('last month')->format("Y-m-d");
-		$calendarData['currentMonth'] = new \DateTime($dateString);
-		$calendarData['currentMonth'] = $calendarData['currentMonth']->format("Y-m-d");
-		$calendarData['dateMap'] = $dateMap;
-		if(isset($participant))
-			$calendarData['participant_id'] = $participant->id;
-		$this->set(compact('calendarData', 'participant'));
+		$this->set(compact('participant'));
 	}
 
 	public function fullCalendarData($startDate, $endDate) {
