@@ -31,6 +31,10 @@
             <td><?= h($location->end_time) ?></td>
         </tr>
         <tr>
+            <th scope="row"><?= __('Hidden') ?></th>
+            <td><?= h($location->hidden) ?></td>
+        </tr>
+        <tr>
             <th scope="row"><?= __('Created') ?></th>
             <td><?= h($location->created) ?></td>
         </tr>

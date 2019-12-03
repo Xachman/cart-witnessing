@@ -69,6 +69,10 @@ class LocationsTable extends Table
             ->time('end_time')
             ->allowEmpty('end_time');
 
+        $validator
+            ->integer('hidden')
+            ->allowEmpty('hidden');
+        
         return $validator;
     }
 

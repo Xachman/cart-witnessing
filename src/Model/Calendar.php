@@ -40,7 +40,7 @@ class Calendar {
 	private function getDayData($date, $scheduledLocations) {
 
 		$locations = $this->Locations->find("all", array(
-					"conditions" => array("day" => $date->format("w"))
+					"conditions" => array("day" => $date->format("w"), 'hidden' => 0)
 					))->order(['start_time' => 'ASC']);
 
 		$return = array();
