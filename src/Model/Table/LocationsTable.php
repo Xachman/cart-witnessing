@@ -73,6 +73,10 @@ class LocationsTable extends Table
             ->integer('hidden')
             ->allowEmpty('hidden');
         
+        $validator
+            ->integer('every_other_week')
+            ->allowEmpty('every_other_week');
+
         return $validator;
     }
 

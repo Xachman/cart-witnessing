@@ -31,16 +31,12 @@
             <td><?= h($location->end_time) ?></td>
         </tr>
         <tr>
+            <th scope="row"><?= __('Every Other Week') ?></th>
+            <td><?= h($location->every_other_week) ?></td>
+        </tr>
+        <tr>
             <th scope="row"><?= __('Hidden') ?></th>
             <td><?= h($location->hidden) ?></td>
-        </tr>
-        <tr>
-            <th scope="row"><?= __('Created') ?></th>
-            <td><?= h($location->created) ?></td>
-        </tr>
-        <tr>
-            <th scope="row"><?= __('Modified') ?></th>
-            <td><?= h($location->modified) ?></td>
         </tr>
     </table>
     <div class="row">

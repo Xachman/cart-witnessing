@@ -28,6 +28,7 @@
         <?php
             echo $this->Form->control('start_time', ['empty' => true]);
             echo $this->Form->control('end_time', ['empty' => true]);
+            echo $this->Form->control('every_other_week', ['type' => 'checkbox']);
             echo $this->Form->control('hidden', ['type' => 'checkbox']);
         ?>
     </fieldset>
