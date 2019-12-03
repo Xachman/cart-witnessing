@@ -32,9 +32,9 @@ class LocationsTable extends Table
     {
         parent::initialize($config);
 
-        $this->table('locations');
-        $this->displayField('name');
-        $this->primaryKey('id');
+        $this->setTable('locations');
+        $this->setDisplayField('name');
+        $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
     }

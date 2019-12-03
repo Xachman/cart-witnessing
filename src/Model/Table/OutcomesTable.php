@@ -34,9 +34,9 @@ class OutcomesTable extends Table
     {
         parent::initialize($config);
 
-        $this->table('outcomes');
-        $this->displayField('id');
-        $this->primaryKey('id');
+        $this->setTable('outcomes');
+        $this->setDisplayField('id');
+        $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
 

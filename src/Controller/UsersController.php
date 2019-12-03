@@ -114,14 +114,13 @@ class UsersController extends AppController
     public function login()
     {
         if ($this->request->is('post')) {
-            if (Validation::email($this->request->data['email'])) {
-                $this->Auth->config('authenticate', [
+            if (Validation::email($this->request->getData('email'))) {
+                $this->Auth->setConfig('authenticate', [
                     'Form' => [
                         'fields' => ['username' => 'email']
                     ]
                 ]);
                 $this->Auth->constructAuthenticate();
-                $this->request->data['email'] = $this->request->data['email'];
             }
             $user = $this->Auth->identify();
             if ($user) {

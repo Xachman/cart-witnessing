@@ -34,9 +34,9 @@ class EmailsTable extends Table
     {
         parent::initialize($config);
 
-        $this->table('emails');
-        $this->displayField('id');
-        $this->primaryKey('id');
+        $this->setTable('emails');
+        $this->setDisplayField('id');
+        $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
 

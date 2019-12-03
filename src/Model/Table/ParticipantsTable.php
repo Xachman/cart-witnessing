@@ -32,9 +32,9 @@ class ParticipantsTable extends Table
     {
         parent::initialize($config);
 
-        $this->table('participants');
-        $this->displayField('full_name');
-        $this->primaryKey('id');
+        $this->setTable('participants');
+        $this->setDisplayField('full_name');
+        $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
     }

@@ -21,7 +21,7 @@ class ParticipantAvailabilityController extends AppController
         $this->paginate = [
             'contain' => ['Participants']
 		];
-		$urlQuery = $this->request->query("day");
+		$urlQuery = $this->request->getQuery("day");
 
 		$participantsQuery = $this->ParticipantAvailability;
 

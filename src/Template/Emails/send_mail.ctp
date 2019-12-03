@@ -11,7 +11,7 @@
     <fieldset>
         <legend><?= __('Send Email') ?></legend>
         <?php
-            echo $this->Form->input('date', [
+            echo $this->Form->control('date', [
                 'type'=>'date',
                 'label' => 'Schedule Date',
                 'selected' => time(),
@@ -19,7 +19,7 @@
                 'maxYear' => date('Y') + 10,
                 'day' => false
             ]);
-            echo $this->Form->input('participant', [
+            echo $this->Form->control('participant', [
                 'type'=>'select',
                 'label' => 'Schedule Date',
                 'options' => $participants,

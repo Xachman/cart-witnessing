@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
       center: 'title',
       right: 'prev,next'
     },
+    aspectRatio: 1,
     views: {
       listDay: { buttonText: 'day' },
       listWeek: { buttonText: 'list' },
@@ -71,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   function deleteFromSchedule(url, start, end, name) {
-    var confirm = window.confirm("Are you sure you want remove "+name+" on "+start.getDate()+"/"+(start.getMonth()+1)+"/"+start.getFullYear()+" starting at "+formatAMPM(start)+"?");
+    var confirm = window.confirm("Are you sure you want remove yourself from "+name+" on "+start.getDate()+"/"+(start.getMonth()+1)+"/"+start.getFullYear()+" starting at "+formatAMPM(start)+"?");
 
     if(confirm) {
         $.post(url).done( () => {

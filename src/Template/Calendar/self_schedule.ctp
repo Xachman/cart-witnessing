@@ -11,7 +11,7 @@
 <?= $this->Form->create() ?>
     <fieldset>
         <legend><?= __('Please enter your email') ?></legend>
-        <?= $this->Form->input('email') ?>
+        <?= $this->Form->control('email') ?>
     </fieldset>
 <?= $this->Form->button(__('Submit`')); ?>
 <?= $this->Form->end() ?>

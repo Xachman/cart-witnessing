@@ -9,8 +9,8 @@
     <fieldset>
         <legend><?= __('Add Location') ?></legend>
         <?php
-            echo $this->Form->input('name');
-            echo $this->Form->input('description');
+            echo $this->Form->control('name');
+            echo $this->Form->control('description');
             $days = array("Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday");
             ?>
             <select name="day">
@@ -20,8 +20,8 @@
                 
             </select>
         <?php
-            echo $this->Form->input('start_time', ['empty' => true]);
-            echo $this->Form->input('end_time', ['empty' => true]);
+            echo $this->Form->control('start_time', ['empty' => true]);
+            echo $this->Form->control('end_time', ['empty' => true]);
         ?>
     </fieldset>
     <?= $this->Form->button(__('Submit')) ?>

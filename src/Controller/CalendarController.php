@@ -93,12 +93,12 @@ class CalendarController extends AppController
 
 	public function selfSchedule($dateString = "") {
 		$this->loadModel('Participants');
-		$session = $this->request->session();
+		$session = $this->request->getSession();
 		if($session->read('self_checkout_paricipant_id')) {
 			$participant = $this->Participants->get($session->read('self_checkout_paricipant_id'));
 		}
 		if ($this->request->is('post')) {
-			$email = $this->request->data['email'];
+			$email = $this->request->getData('email');
 			if (Validation::email($email)) {
 				$participant = $this->Participants->find()->where(["email" => $email])->first();
 				if(!$participant) {
@@ -141,7 +141,7 @@ class CalendarController extends AppController
 	private function validateParticipant() {
 
 		$this->loadModel('Participants');
-		$session = $this->request->session();
+		$session = $this->request->getSession();
 		if($session->read('self_checkout_paricipant_id')) {
 			$participant = $this->Participants->get($session->read('self_checkout_paricipant_id'));
 		}

@@ -19,12 +19,12 @@
     <fieldset>
         <legend><?= __('Edit Scheduled Location') ?></legend>
         <?php
-            echo $this->Form->input('location_id', ['options' => $locations, 'empty' => true]);
-            echo $this->Form->input('participant_id', ['options' => $participants, 'empty' => true]);
-            echo $this->Form->input('schedule_date', ['empty' => true]);
-            echo $this->Form->input('start_time', ['empty' => true]);
-            echo $this->Form->input('end_time', ['empty' => true]);
-            echo $this->Form->input('notes');
+            echo $this->Form->control('location_id', ['options' => $locations, 'empty' => true]);
+            echo $this->Form->control('participant_id', ['options' => $participants, 'empty' => true]);
+            echo $this->Form->control('schedule_date', ['empty' => true]);
+            echo $this->Form->control('start_time', ['empty' => true]);
+            echo $this->Form->control('end_time', ['empty' => true]);
+            echo $this->Form->control('notes');
         ?>
     </fieldset>
     <?= $this->Form->button(__('Submit')) ?>

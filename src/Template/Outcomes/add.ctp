@@ -11,16 +11,16 @@
     <fieldset>
         <legend><?= __('Add Outcome') ?></legend>
         <?php
-            echo $this->Form->input('location_id', ['options' => $locations]);
-            echo $this->Form->input('books');
-            echo $this->Form->input('magazines');
-            echo $this->Form->input('brochures');
-            echo $this->Form->input('tracts');
-            echo $this->Form->input('contact_cards');
-            echo $this->Form->input('videos');
-            echo $this->Form->input('return_visits');
-            echo $this->Form->input('bible_studies');
-            echo $this->Form->input('date_worked', ['empty' => true]);
+            echo $this->Form->control('location_id', ['options' => $locations]);
+            echo $this->Form->control('books');
+            echo $this->Form->control('magazines');
+            echo $this->Form->control('brochures');
+            echo $this->Form->control('tracts');
+            echo $this->Form->control('contact_cards');
+            echo $this->Form->control('videos');
+            echo $this->Form->control('return_visits');
+            echo $this->Form->control('bible_studies');
+            echo $this->Form->control('date_worked', ['empty' => true]);
         ?>
     </fieldset>
     <?= $this->Form->button(__('Submit')) ?>

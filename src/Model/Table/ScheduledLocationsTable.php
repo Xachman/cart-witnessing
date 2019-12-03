@@ -37,9 +37,9 @@ class ScheduledLocationsTable extends Table
     {
         parent::initialize($config);
 
-        $this->table('scheduled_locations');
-        $this->displayField('id');
-        $this->primaryKey('id');
+        $this->setTable('scheduled_locations');
+        $this->setDisplayField('id');
+        $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
 
