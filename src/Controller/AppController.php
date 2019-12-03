@@ -15,6 +15,7 @@
 namespace App\Controller;
 
 use Cake\Controller\Controller;
+use Cake\Core\Exception\MissingPluginException;
 use Cake\Event\Event;
 
 /**
@@ -81,4 +82,5 @@ class AppController extends Controller
                 return $this->redirect(['controller' => 'users', 'action' => 'add']);
         }
     }
+
 }

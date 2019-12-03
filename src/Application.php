@@ -15,6 +15,7 @@
 namespace App;
 
 use Cake\Core\Configure;
+use Cake\Core\Exception\MissingPluginException;
 use Cake\Error\Middleware\ErrorHandlerMiddleware;
 use Cake\Http\BaseApplication;
 use Cake\Routing\Middleware\AssetMiddleware;
@@ -49,4 +50,46 @@ class Application extends BaseApplication
 
         return $middleware;
     }
+    
+    /**
+     * @return void
+     */
+    protected function bootstrapCli()
+    {
+        try {
+            $this->addPlugin('Bake');
+        } catch (MissingPluginException $e) {
+            // Do not halt if the plugin is missing
+        }
+
+        $this->addPlugin('Migrations');
+
+        // Load more plugins here
+    }
+
+        /**
+     * {@inheritDoc}
+     */
+    public function bootstrap()
+    {
+        $this->addPlugin('Migrations');
+
+        // Call parent to load bootstrap from files.
+        parent::bootstrap();
+
+        if (PHP_SAPI === 'cli') {
+            $this->bootstrapCli();
+        }
+
+        /*
+         * Only try to load DebugKit in development mode
+         * Debug Kit should not be installed on a production system
+         */
+        if (Configure::read('debug')) {
+            $this->addPlugin(\DebugKit\Plugin::class);
+        }
+
+        // Load more plugins here
+    }
+    
 }
