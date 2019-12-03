@@ -77,7 +77,16 @@ class ScheduledLocationsController extends AppController
 					return $this->redirect(["controller" => $queryController, "action" => $queryAction, $selectedDate]);
 				}else{
                 	return $this->redirect(['action' => 'index']);
-				}
+                }
+                if($participantId) {
+                    $this->set([
+                        'data' => [
+                            "success"
+                        ],
+                        '_serialize' => 'data',
+                    ]);
+                    return $this->RequestHandler->renderAs($this, "json");
+                }
             } else {
                 $this->Flash->error(__('The scheduled location could not be saved. Please, try again.'));
             }
