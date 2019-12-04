@@ -5,6 +5,8 @@ use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
+use Cake\ORM\TableRegistry;
+
 
 /**
  * ScheduledLocations Model
@@ -35,9 +37,9 @@ class ScheduledLocationsTable extends Table
     {
         parent::initialize($config);
 
-        $this->table('scheduled_locations');
-        $this->displayField('id');
-        $this->primaryKey('id');
+        $this->setTable('scheduled_locations');
+        $this->setDisplayField('id');
+        $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
 
@@ -100,7 +102,6 @@ class ScheduledLocationsTable extends Table
 						'ScheduledLocations.schedule_date <= ' => $endDate->format("Y/m/d")
 					),
 					'order' => array(
-						"ScheduledLocations.schedule_date",
 						"ScheduledLocations.start_time"
 					)
 				));
@@ -114,4 +115,26 @@ class ScheduledLocationsTable extends Table
             )
         ))->toArray());
     }
+
+    public function getAvailableParticipants($locationId, $date) {
+        if(!$locationId || !$date) {
+            return $this->Participants->find('all');
+        }
+		$location = $this->Locations->get($locationId);
+
+		$this->ParticipantAvailability = TableRegistry::get('ParticipantAvailability');
+		$availableParticipants = $this->ParticipantAvailability->find()->contain(['Participants'])->where(['day' => $location->day,  ])->toArray();
+	
+
+		
+		$participants = [];
+		foreach($availableParticipants as $availPart) {
+			$participants[] = $availPart['participant'];
+		}
+		
+
+		return $participants;
+
+	
+	}
 }

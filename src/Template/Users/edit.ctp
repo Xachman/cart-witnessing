@@ -15,8 +15,8 @@
     <fieldset>
         <legend><?= __('Edit User') ?></legend>
         <?php
-            echo $this->Form->input('email');
-            echo $this->Form->input('password');
+            echo $this->Form->control('email');
+            echo $this->Form->control('password');
         ?>
     </fieldset>
     <?= $this->Form->button(__('Submit')) ?>

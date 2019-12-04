@@ -34,9 +34,9 @@ class EmailAttachmentsTable extends Table
     {
         parent::initialize($config);
 
-        $this->table('email_attachments');
-        $this->displayField('name');
-        $this->primaryKey('id');
+        $this->setTable('email_attachments');
+        $this->setDisplayField('name');
+        $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
 

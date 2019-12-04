@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Controller\AppController;
+use Cake\Event\Event;
 
 /**
  * ScheduledLocations Controller
@@ -11,7 +12,11 @@ use App\Controller\AppController;
  */
 class ScheduledLocationsController extends AppController
 {
-
+    public function beforeFilter(Event $event)
+    {
+        // allow only login, forgotpassword
+         $this->Auth->allow(['selfAdd', 'selfDelete']);
+    }
     /**
      * Index method
      *
@@ -55,20 +60,32 @@ class ScheduledLocationsController extends AppController
      *
      * @return \Cake\Network\Response|void Redirects on successful add, renders view otherwise.
      */
-    public function add($locationId = "", $selectedDate = "")
+    public function add($locationId = "", $selectedDate = "", $participantId = false)
 	{
-		$queryAction = $this->request->query["action"];
-		$queryController = $this->request->query["controller"];
+		$queryAction = $this->request->getQuery("action");
+		$queryController = $this->request->getQuery("controller");
         $scheduledLocation = $this->ScheduledLocations->newEntity();
         if ($this->request->is('post')) {
-            $scheduledLocation = $this->ScheduledLocations->patchEntity($scheduledLocation, $this->request->data);
+            $data = (array) $this->request->getData();
+            if($participantId) {
+                $data['participant_id'] = $participantId;
+            }
+            $scheduledLocation = $this->ScheduledLocations->patchEntity($scheduledLocation, $data);
             if ($this->ScheduledLocations->save($scheduledLocation)) {
+                if($participantId) {
+                    $this->set([
+                        'data' => [
+                            "success"
+                        ],
+                        '_serialize' => 'data',
+                    ]);
+                    return $this->RequestHandler->renderAs($this, "json");
+                }
                 $this->Flash->success(__('The scheduled location has been saved.'));
 				if($queryAction && $queryController) {
 					return $this->redirect(["controller" => $queryController, "action" => $queryAction, $selectedDate]);
-				}else{
-                	return $this->redirect(['action' => 'index']);
-				}
+                }
+                return $this->redirect(['action' => 'index']);
             } else {
                 $this->Flash->error(__('The scheduled location could not be saved. Please, try again.'));
             }
@@ -79,13 +96,38 @@ class ScheduledLocationsController extends AppController
             $locations[$location->id] = $location->name .' - '. $days[$location->day];
         }
         $participants = array();
-        foreach($this->ScheduledLocations->Participants->find('all') as $participant) {
+        foreach($this->ScheduledLocations->getAvailableParticipants($locationId, $selectedDate) as $participant) {
             $participants[$participant->id] =  $participant->first_name . ' ' .$participant->last_name;
         }
-        $this->set(compact('scheduledLocation', 'locations', 'participants','locationId', 'selectedDate'));
+        if((int) $locationId) {
+            $selectedLocation = $this->ScheduledLocations->Locations->get($locationId);
+        }
+        $this->set(compact('scheduledLocation', 'locations', 'participants','locationId', 'selectedDate', 'selectedLocation'));
         $this->set('_serialize', ['scheduledLocation']);
     }
+    public function selfAdd($locationId, $selectedDate) {
+        $session = $this->request->getSession();
+		if ($this->request->is('post')) {
+		    $participantId = $session->read('self_checkout_paricipant_id');
+			if (!$participantId) {
+                $this->Flash->error('No ID');
+                return $this->redirect(['controller' => 'Calendar', 'action' => 'selfSchedule']);
+            }
+            $this->add($locationId, $selectedDate, $participantId);
+        }
 
+    }
+    public function selfDelete($id, $date) {
+        $session = $this->request->getSession();
+		if ($this->request->is('post')) {
+		    $participantId = $session->read('self_checkout_paricipant_id');
+			if (!$participantId) {
+                $this->Flash->error('No ID');
+                return $this->redirect(['controller' => 'Calendar', 'action' => 'selfSchedule']);
+            }
+            $this->delete($id, $date, true);
+        }
+    }
     /**
      * Edit method
      *
@@ -98,10 +140,10 @@ class ScheduledLocationsController extends AppController
         $scheduledLocation = $this->ScheduledLocations->get($id, [
             'contain' => []
         ]);
-		$queryAction = $this->request->query["action"];
-		$queryController = $this->request->query["controller"];
+		$queryAction = $this->request->getQuery("action");
+		$queryController = $this->request->getQuery("controller");
         if ($this->request->is(['patch', 'post', 'put'])) {
-            $scheduledLocation = $this->ScheduledLocations->patchEntity($scheduledLocation, $this->request->data);
+            $scheduledLocation = $this->ScheduledLocations->patchEntity($scheduledLocation, $this->request->getData());
             if ($this->ScheduledLocations->save($scheduledLocation)) {
                 $this->Flash->success(__('The scheduled location has been saved.'));
 				$date = $scheduledLocation->schedule_date->format("Y-m-d");
@@ -134,16 +176,31 @@ class ScheduledLocationsController extends AppController
      * @return \Cake\Network\Response|null Redirects to index.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function delete($id = null)
+    public function delete($id = null, $date = null, $json = false)
     {
         $this->request->allowMethod(['post', 'delete']);
         $scheduledLocation = $this->ScheduledLocations->get($id);
         if ($this->ScheduledLocations->delete($scheduledLocation)) {
+            if($json) {
+                $this->set([
+                    'data' => [
+                        "success"
+                    ],
+                    '_serialize' => 'data',
+                ]);
+                return $this->RequestHandler->renderAs($this, "json");
+            }
             $this->Flash->success(__('The scheduled location has been deleted.'));
         } else {
             $this->Flash->error(__('The scheduled location could not be deleted. Please, try again.'));
         }
 
+		$queryAction = $this->request->getQuery("action");
+		$queryController = $this->request->getQuery("controller");
+        if(isset($queryAction) && isset($queryController)) {
+            return $this->redirect(["controller" => $queryController, "action" => $queryAction, $date]);
+        }        
         return $this->redirect(['action' => 'index']);
-    }
+	}
+	
 }

@@ -35,9 +35,9 @@ class ParticipantAvailabilityTable extends Table
     {
         parent::initialize($config);
 
-        $this->table('participant_availability');
-        $this->displayField('id');
-        $this->primaryKey('id');
+        $this->setTable('participant_availability');
+        $this->setDisplayField('id');
+        $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
 

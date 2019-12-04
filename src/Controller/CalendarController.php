@@ -16,6 +16,10 @@ namespace App\Controller;
 
 use App\Controller\AppController;
 use App\Model\Calendar;
+use Cake\Event\Event;
+use Cake\Mailer\Email;
+use Cake\Routing\Router;
+use Cake\Validation\Validation;
 
 /**
  * Application Controller
@@ -30,6 +34,7 @@ class CalendarController extends AppController
 	private $Calendar;
 
 	public function initialize() {
+		parent::initialize();
 		$this->Calendar = new Calendar();		
 	}
 	/**
@@ -48,11 +53,15 @@ class CalendarController extends AppController
 	{
 		$date = new \DateTime($dateString);
 		var_dump($date);
-		$dateMap = $this->getCalendarData($date->format("Y/m/1"), $date->format("Y/m/t"));
+		$dateMap = $this->Calendar->getCalendarData($date->format("Y/m/1"), $date->format("Y/m/t"));
 		$this->set(compact('dateMap'));
 
 	}
-
+    public function beforeFilter(Event $event)
+    {
+        // allow only login, forgotpassword
+         $this->Auth->allow(['selfSchedule', 'fullCalendarData']);
+    }
 	public function month($dateString = "") {
 		$date = new \DateTime($dateString);
 		$date->setDate($date->format("Y"), $date->format("m"), 1);
@@ -61,9 +70,15 @@ class CalendarController extends AppController
 		$startDate = new \DateTime(date("Y/m/d", strtotime("-".$date->format("w")." days", strtotime($date->format("Y/m/1")))));
 		$date->setDate($date->format("Y"), $date->format("m"), $date->format("t"));
 		$endDate = new \DateTime(date("Y/m/d", strtotime("+".(6-$date->format("w"))." days", strtotime($date->format("Y/m/d")))));
-		$dateMap = $this->getCalendarData($startDate->format("Y/m/d"), $endDate->format("Y/m/d"));
+		$dateMap = $this->Calendar->getCalendarData($startDate->format("Y/m/d"), $endDate->format("Y/m/d"));
 
 		$calendarData['title'] = $title;
+		$calendarData['nextMonth'] = new \DateTime($dateString);
+		$calendarData['nextMonth'] = $calendarData['nextMonth']->modify('next month')->format("Y-m-d");
+		$calendarData['lastMonth'] = new \DateTime($dateString);
+		$calendarData['lastMonth'] = $calendarData['lastMonth']->modify('last month')->format("Y-m-d");
+		$calendarData['currentMonth'] = new \DateTime($dateString);
+		$calendarData['currentMonth'] = $calendarData['currentMonth']->format("Y-m-d");
 		$calendarData['dateMap'] = $dateMap;
 		$this->set(compact('calendarData'));
 
@@ -78,30 +93,64 @@ class CalendarController extends AppController
 		}
 	}
 
-	public function scheduleMonth($month) {
-		
-	}
-
-	private function getCalendarData($startDateStr = "", $endDateStr = "" ) {
-
-		$this->loadModel("ScheduledLocations");
-
-		$startDate = new \DateTime($startDateStr);
-		$endDate = new \DateTime($endDateStr);
-		$incDate = new \DateTime($startDate->format("Y/m/d"));
-
-		$scheduledLocations = $this->ScheduledLocations->getRange( $startDate, $endDate);
-		$scheduledLocationsCount = 	$this->ScheduledLocations->getParticipantsInRange($startDate, $endDate);	//var_dump($scheduledLocationsCount);
-		$dateMap = array();
-		while($incDate->getTimestamp() <= $endDate->getTimestamp()) {
-
-			$dateMap[$incDate->format("Y_m_d")] = $this->getDayData($incDate, $scheduledLocations);
-			$incDate->setDate($incDate->format("Y"), $incDate->format("m"), $incDate->format("d") +1);
+	public function selfSchedule($dateString = "") {
+		$this->loadModel('Participants');
+		$qId = $this->request->getQuery('id');
+		$session = $this->request->getSession();
+		if ($this->request->is('post')) {
+			$email = $this->request->getData('email');
+			if (Validation::email($email)) {
+				$participant = $this->Participants->find()->where(["email" => $email])->first();
+				if(!$participant) {
+					$this->Flash->error('Email not found');
+					return;
+				}else{
+					$emailer = new Email('default');
+					$emailer->setFrom(['carts@gtiwebdev.com' => 'Carts App'])
+						->setTo($email)
+						->setEmailFormat('html')
+						->setSubject('Your link to publiccarts.xyz')
+						->send('This link will allow access to publiccart.xyz<br><a href="'.Router::fullBaseUrl().'/calendar/self-schedule/?id='.$participant->uuid.'">Link to publiccart.xyz</a>');
+					$this->Flash->success('Email sent! Click the link to get in!');
+					return;
+				}
+			}
 		}
-
-		return $dateMap;
+		if($qId) {
+			$participant = $this->Participants->find()->where(["uuid" => $qId])->first();
+			if(!$participant) {
+				$this->Flash->error('Bad url');
+				return;
+			}
+			$session->write('self_checkout_paricipant_id', $participant->id);
+		}
+		if($session->read('self_checkout_paricipant_id')) {
+			$participant = $this->Participants->get($session->read('self_checkout_paricipant_id'));
+		}
+		$this->set(compact('participant'));
 	}
 
+	public function fullCalendarData($startDate, $endDate) {
+		$participant = $this->validateParticipant();
+		$this->set([
+			'data' => $this->Calendar->getFullCalendarData($startDate, $endDate, $participant),
+			'_serialize' => 'data',
+		]);
+		return $this->RequestHandler->renderAs($this, "json");
+	}
+	private function validateParticipant() {
+
+		$this->loadModel('Participants');
+		$session = $this->request->getSession();
+		if($session->read('self_checkout_paricipant_id')) {
+			$participant = $this->Participants->get($session->read('self_checkout_paricipant_id'));
+		}
+		if(!isset($participant)) {
+			$this->Flash->error('Please enter email');
+            return $this->redirect(['action' => 'selfSchedule']);
+		}	
+		return $participant;
+	}
 	private function getLocationsByDate($dateString) {
 		$locations = $this->Locations->find("all");
 		$targetDate = new \DateTime($dateString);
@@ -114,37 +163,6 @@ class CalendarController extends AppController
 		return $return;
 	}
 
-	private function getDayData($date, $scheduledLocations) {
-
-		$this->loadModel("Participants");
-		$this->loadModel("Locations");
-
-		$locations = $this->Locations->find("all", array(
-					"conditions" => array("day" => $date->format("w"))
-					));
-
-		$return = array();
-		foreach($scheduledLocations as $schedLoc) {
-			if($date->format("Y/m/d") == $schedLoc->schedule_date->format("Y/m/d")) {
-				$participant = $this->Participants->get($schedLoc->participant_id);
-				$return["scheduled_locations"][] = array(
-						"participant" 	=> $participant->first_name." ".$participant->last_name,
-						"start_time" 	 => $schedLoc->start_time,
-						"end_time"      => $schedLoc->end_time,
-						"id"        	=> $schedLoc->id,
-						"location_id"  => $schedLoc->location_id
-						//	"locations" 	=> $this->getLocationsByDate($schedLoc->start_date)
-						);
-
-			}
-		}
-		foreach($locations as $location) {
-			$return["locations"][] = $location; 
-		}
-
-		return $return;
-
-	}
 
 
 

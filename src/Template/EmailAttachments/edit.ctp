@@ -17,9 +17,9 @@
     <fieldset>
         <legend><?= __('Edit Email Attachment') ?></legend>
         <?php
-            echo $this->Form->input('email_id', ['options' => $emails]);
-            echo $this->Form->input('name');
-            echo $this->Form->input('url');
+            echo $this->Form->control('email_id', ['options' => $emails]);
+            echo $this->Form->control('name');
+            echo $this->Form->control('url');
         ?>
     </fieldset>
     <?= $this->Form->button(__('Submit')) ?>

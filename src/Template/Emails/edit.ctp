@@ -17,8 +17,8 @@
     <fieldset>
         <legend><?= __('Edit Email') ?></legend>
         <?php
-            echo $this->Form->input('subject');
-            echo $this->Form->input('message');
+            echo $this->Form->control('subject');
+            echo $this->Form->control('message');
         ?>
     </fieldset>
     <?= $this->Form->button(__('Submit')) ?>

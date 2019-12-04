@@ -32,9 +32,9 @@ class UsersTable extends Table
     {
         parent::initialize($config);
 
-        $this->table('users');
-        $this->displayField('id');
-        $this->primaryKey('id');
+        $this->setTable('users');
+        $this->setDisplayField('id');
+        $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
     }
@@ -75,5 +75,13 @@ class UsersTable extends Table
         $rules->add($rules->isUnique(['email']));
 
         return $rules;
+    }
+
+    public function isUsers() {
+        $users = $this->find("all");
+        if($users->count() > 0) {
+            return true;
+        }
+        return false;
     }
 }

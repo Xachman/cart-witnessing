@@ -32,9 +32,9 @@ class LocationsTable extends Table
     {
         parent::initialize($config);
 
-        $this->table('locations');
-        $this->displayField('name');
-        $this->primaryKey('id');
+        $this->setTable('locations');
+        $this->setDisplayField('name');
+        $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
     }
@@ -68,6 +68,14 @@ class LocationsTable extends Table
         $validator
             ->time('end_time')
             ->allowEmpty('end_time');
+
+        $validator
+            ->integer('hidden')
+            ->allowEmpty('hidden');
+        
+        $validator
+            ->integer('every_other_week')
+            ->allowEmpty('every_other_week');
 
         return $validator;
     }
