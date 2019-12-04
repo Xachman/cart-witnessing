@@ -13,7 +13,7 @@
         <legend><?= __('Please enter your email') ?></legend>
         <?= $this->Form->control('email') ?>
     </fieldset>
-<?= $this->Form->button(__('Submit`')); ?>
+<?= $this->Form->button(__('Submit')); ?>
 <?= $this->Form->end() ?>
 </div>
     <?php
