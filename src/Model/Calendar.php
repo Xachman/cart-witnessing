@@ -38,11 +38,24 @@ class Calendar {
     }
 
 	private function getDayData($date, $scheduledLocations) {
+        $oddWeek = $date->format("W") % 2;
+        $conditions = [
+            "day" => $date->format("w"), 
+            'hidden' => 0, 
+        ];
 
+        if($oddWeek) {
+            $conditions['OR'] = [
+                ['every_other_week' => 0],
+                ['every_other_week' => 1]
+            ];
+        }else{
+            $conditions['every_other_week'] = 0;
+        }
 		$locations = $this->Locations->find("all", array(
-					"conditions" => array("day" => $date->format("w"), 'hidden' => 0)
+					"conditions" => $conditions
 					))->order(['start_time' => 'ASC']);
-
+      //  debug($locations);
 		$return = array();
 		foreach($scheduledLocations as $schedLoc) {
 			if($date->format("Y/m/d") == $schedLoc->schedule_date->format("Y/m/d")) {
