@@ -72,12 +72,6 @@ class ScheduledLocationsController extends AppController
             }
             $scheduledLocation = $this->ScheduledLocations->patchEntity($scheduledLocation, $data);
             if ($this->ScheduledLocations->save($scheduledLocation)) {
-                $this->Flash->success(__('The scheduled location has been saved.'));
-				if($queryAction && $queryController) {
-					return $this->redirect(["controller" => $queryController, "action" => $queryAction, $selectedDate]);
-				}else{
-                	return $this->redirect(['action' => 'index']);
-                }
                 if($participantId) {
                     $this->set([
                         'data' => [
@@ -87,6 +81,11 @@ class ScheduledLocationsController extends AppController
                     ]);
                     return $this->RequestHandler->renderAs($this, "json");
                 }
+                $this->Flash->success(__('The scheduled location has been saved.'));
+				if($queryAction && $queryController) {
+					return $this->redirect(["controller" => $queryController, "action" => $queryAction, $selectedDate]);
+                }
+                return $this->redirect(['action' => 'index']);
             } else {
                 $this->Flash->error(__('The scheduled location could not be saved. Please, try again.'));
             }
@@ -116,7 +115,6 @@ class ScheduledLocationsController extends AppController
             }
             $this->add($locationId, $selectedDate, $participantId);
         }
-        return $this->redirect(['controller' => 'Calendar', 'action' => 'selfSchedule']);
 
     }
     public function selfDelete($id, $date) {
@@ -127,9 +125,8 @@ class ScheduledLocationsController extends AppController
                 $this->Flash->error('No ID');
                 return $this->redirect(['controller' => 'Calendar', 'action' => 'selfSchedule']);
             }
-            $this->delete($id, $date);
+            $this->delete($id, $date, true);
         }
-        return $this->redirect(['controller' => 'Calendar', 'action' => 'selfSchedule']);
     }
     /**
      * Edit method
@@ -146,7 +143,7 @@ class ScheduledLocationsController extends AppController
 		$queryAction = $this->request->getQuery("action");
 		$queryController = $this->request->getQuery("controller");
         if ($this->request->is(['patch', 'post', 'put'])) {
-            $scheduledLocation = $this->ScheduledLocations->patchEntity($scheduledLocation, $this->request->data);
+            $scheduledLocation = $this->ScheduledLocations->patchEntity($scheduledLocation, $this->request->getData());
             if ($this->ScheduledLocations->save($scheduledLocation)) {
                 $this->Flash->success(__('The scheduled location has been saved.'));
 				$date = $scheduledLocation->schedule_date->format("Y-m-d");
@@ -179,11 +176,20 @@ class ScheduledLocationsController extends AppController
      * @return \Cake\Network\Response|null Redirects to index.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function delete($id = null, $date = null)
+    public function delete($id = null, $date = null, $json = false)
     {
         $this->request->allowMethod(['post', 'delete']);
         $scheduledLocation = $this->ScheduledLocations->get($id);
         if ($this->ScheduledLocations->delete($scheduledLocation)) {
+            if($json) {
+                $this->set([
+                    'data' => [
+                        "success"
+                    ],
+                    '_serialize' => 'data',
+                ]);
+                return $this->RequestHandler->renderAs($this, "json");
+            }
             $this->Flash->success(__('The scheduled location has been deleted.'));
         } else {
             $this->Flash->error(__('The scheduled location could not be deleted. Please, try again.'));
@@ -194,7 +200,6 @@ class ScheduledLocationsController extends AppController
         if(isset($queryAction) && isset($queryController)) {
             return $this->redirect(["controller" => $queryController, "action" => $queryAction, $date]);
         }        
-
         return $this->redirect(['action' => 'index']);
 	}
 	

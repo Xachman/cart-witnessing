@@ -17,6 +17,8 @@ namespace App\Controller;
 use App\Controller\AppController;
 use App\Model\Calendar;
 use Cake\Event\Event;
+use Cake\Mailer\Email;
+use Cake\Routing\Router;
 use Cake\Validation\Validation;
 
 /**
@@ -93,20 +95,37 @@ class CalendarController extends AppController
 
 	public function selfSchedule($dateString = "") {
 		$this->loadModel('Participants');
+		$qId = $this->request->getQuery('id');
 		$session = $this->request->getSession();
-		if($session->read('self_checkout_paricipant_id')) {
-			$participant = $this->Participants->get($session->read('self_checkout_paricipant_id'));
-		}
 		if ($this->request->is('post')) {
 			$email = $this->request->getData('email');
 			if (Validation::email($email)) {
 				$participant = $this->Participants->find()->where(["email" => $email])->first();
 				if(!$participant) {
 					$this->Flash->error('Email not found');
+					return;
 				}else{
-					$session->write('self_checkout_paricipant_id', $participant->id);
+					$emailer = new Email('default');
+					$emailer->setFrom(['carts@gtiwebdev.com' => 'Carts App'])
+						->setTo($email)
+						->setEmailFormat('html')
+						->setSubject('Your link to publiccarts.xyz')
+						->send('This link will allow access to publiccart.xyz<br><a href="'.Router::fullBaseUrl().'/calendar/self-schedule/?id='.$participant->uuid.'">Link to publiccart.xyz</a>');
+					$this->Flash->success('Email sent! Click the link to get in!');
+					return;
 				}
 			}
+		}
+		if($qId) {
+			$participant = $this->Participants->find()->where(["uuid" => $qId])->first();
+			if(!$participant) {
+				$this->Flash->error('Bad url');
+				return;
+			}
+			$session->write('self_checkout_paricipant_id', $participant->id);
+		}
+		if($session->read('self_checkout_paricipant_id')) {
+			$participant = $this->Participants->get($session->read('self_checkout_paricipant_id'));
 		}
 		$this->set(compact('participant'));
 	}
