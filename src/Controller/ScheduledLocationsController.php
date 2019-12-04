@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Controller\AppController;
+use App\Model\GoogleCalendar;
+use Cake\Core\Configure;
 use Cake\Event\Event;
 
 /**
@@ -70,8 +72,10 @@ class ScheduledLocationsController extends AppController
             if($participantId) {
                 $data['participant_id'] = $participantId;
             }
+            $data['google_calendar_id'] = "yo";
             $scheduledLocation = $this->ScheduledLocations->patchEntity($scheduledLocation, $data);
             if ($this->ScheduledLocations->save($scheduledLocation)) {
+
                 if($participantId) {
                     $this->set([
                         'data' => [
