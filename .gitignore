@@ -5,5 +5,4 @@ node_modules/
 /tmp
 /logs
 .vscode/
-phinx.yml
 creds/
