@@ -135,7 +135,24 @@ class CalendarHelper extends Helper {
 						</div>
 						<?php }else{?>
 					<div class="participant">
-						<div class="name"><?= $schedule['participant'] ?></div>
+						<div class="name">
+							<?= $schedule['participant'] ?>
+							<?php if(!isset($participant)) {
+								echo $this->Form->postLink('Delete',[
+									'controller' => 'ScheduledLocations',
+									'action' => 'delete',
+									$schedule['id'],
+									$date->format("Y-m-d"),
+									'?' => [
+										'controller' => 'calendar',
+										'action' => 'month'
+									],
+								],
+								[
+									'confirm' => "Delete schedule on ".$date->format('M d')."?",
+								]);
+							}?>
+						</div>
 					</div>
 						<?php } ?>
 			<?php
