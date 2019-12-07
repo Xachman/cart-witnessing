@@ -1,6 +1,12 @@
 <?php
 namespace App\Model\Table;
 
+use App\Model\GoogleCalendar;
+use ArrayObject;
+use Cake\Core\Configure;
+use Cake\Datasource\EntityInterface;
+use Cake\Event\Event;
+use Cake\Log\Log;
 use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
@@ -78,6 +84,9 @@ class ScheduledLocationsTable extends Table
         $validator
             ->allowEmpty('notes');
 
+        $validator
+            ->allowEmpty('google_calendar_id');
+
         return $validator;
     }
 
@@ -96,6 +105,21 @@ class ScheduledLocationsTable extends Table
         return $rules;
     }
 
+    public function afterSave($event, $entity, $options) {
+        if(Configure::read('calendarId') && !$entity->afterSaved) {
+            $googleCalendar = new GoogleCalendar;
+            $eventId = $googleCalendar->addScheduledEvent($entity->id);
+            $entity->google_calendar_id = $eventId;
+            $entity->afterSaved = true;
+            $this->save($entity);
+        }
+    }
+    public function beforeDelete($event, $entity, $options) {
+        if(Configure::read('calendarId') && !$entity->afterSaved) {
+            $googleCalendar = new GoogleCalendar;
+            $googleCalendar->deleteScheduledEvent($entity->id);
+        }
+    }
     public function getRange($startDate, $endDate) {
         return $this->find('all', array(
 					'conditions' => array('ScheduledLocations.schedule_date >= ' => $startDate->format("Y/m/d"),
