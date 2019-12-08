@@ -100,7 +100,7 @@ class CalendarController extends AppController
 		if ($this->request->is('post')) {
 			$email = $this->request->getData('email');
 			if (Validation::email($email)) {
-				$participant = $this->Participants->find()->where(["email" => $email])->first();
+				$participant = $this->Participants->find()->where(["email" => $email, 'deleted' => 0])->first();
 				if(!$participant) {
 					$this->Flash->error('Email not found');
 					return;
@@ -117,7 +117,7 @@ class CalendarController extends AppController
 			}
 		}
 		if($qId) {
-			$participant = $this->Participants->find()->where(["uuid" => $qId])->first();
+			$participant = $this->Participants->find()->where(["uuid" => $qId, 'deleted' => 0])->first();
 			if(!$participant) {
 				$this->Flash->error('Bad url');
 				return;

@@ -20,7 +20,7 @@ class EmailsController extends AppController {
         $this->addShortcode("schedule", array($this, "getSchedule"));
         $this->addShortcode("month", array($this, "getMonth"));
         $this->addShortcode("participant_schedule", array($this, "participantSchedule"));
-        $this->addShortcode("name", array($this, "getName"));
+        $this->addShortcode("name", array($this, "getFullName"));
 
         $this->loadModel('Participants');
         $this->loadModel('ScheduledLocations');
@@ -160,7 +160,7 @@ class EmailsController extends AppController {
         $this->shortcodes[$key] = $functionName;
     }
 
-    private function getParticipantName($participant) {
+    private function getFullName($participant) {
         return $participant->first_name . " " . $participant->last_name;
     }
 
@@ -219,7 +219,7 @@ class EmailsController extends AppController {
         return date("F", mktime(null, null, null, $data['date']['month']));
     }
 
-    public function getName($data) {
+    public function getParticipantName($data) {
         $participant  = $this->Participants->get($data['participant']);
         return $participant->full_name;
     }
@@ -229,12 +229,12 @@ class EmailsController extends AppController {
 
         $scheduledLocations = $this->ScheduledLocations->find('all')->where([
             'participant_id' => $participant->id,
-            'schedule_date BETWEEN ? AND ?' => array(date("Y-m-d")); 
-        ])
+            'schedule_date BETWEEN ? AND ?' => array(date("Y-m-d"))
+        ]);
         // get scheduled locations for date
 
 
-        return 
+        return;
     }
 
 }
