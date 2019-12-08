@@ -65,6 +65,10 @@ class ParticipantsTable extends Table
             ->allowEmpty('email');
 
         $validator
+            ->integer('deleted')
+            ->allowEmpty('deleted');
+
+        $validator
             ->allowEmpty('phone');
 
         return $validator;

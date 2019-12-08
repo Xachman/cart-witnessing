@@ -18,7 +18,7 @@ class ParticipantsController extends AppController
      */
     public function index()
     {
-        $participants = $this->paginate($this->Participants);
+        $participants = $this->paginate($this->Participants->find('all')->where(['deleted' => 0]));
         $this->set(compact('participants'));
         $this->set('_serialize', ['participants']);
     }
@@ -99,7 +99,8 @@ class ParticipantsController extends AppController
     {
         $this->request->allowMethod(['post', 'delete']);
         $participant = $this->Participants->get($id);
-        if ($this->Participants->delete($participant)) {
+        $participant->deleted = 1;
+        if ($this->Participants->save($participant)) {
             $this->Flash->success(__('The participant has been deleted.'));
         } else {
             $this->Flash->error(__('The participant could not be deleted. Please, try again.'));
