@@ -7,7 +7,8 @@
         <li><?= $this->Html->link(__('New Email'), ['action' => 'add']) ?> </li>
         <li><?= $this->Html->link(__('List Email Attachments'), ['controller' => 'EmailAttachments', 'action' => 'index']) ?> </li>
         <li><?= $this->Html->link(__('New Email Attachment'), ['controller' => 'EmailAttachments', 'action' => 'add']) ?> </li>
-        <li><?= $this->Html->link(__('Send Email'), ['controller' => 'Emails', 'action' => 'sendMail', $email->id]) ?> </li>
+        <li><?= $this->Form->postLink(__('Send Email'), ['controller' => 'Emails', 'action' => 'sendMail', $email->id], ['confirm' => 'Send email?']) ?> </li>
+        <li><?= $this->html->link(__('Send Test Email'), ['controller' => 'Emails', 'action' => 'sendTestEmail', $email->id]) ?> </li>
     </ul>
 </nav>
 <div class="emails view large-9 medium-8 columns content">

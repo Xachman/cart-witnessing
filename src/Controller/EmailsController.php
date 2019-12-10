@@ -63,7 +63,7 @@ class EmailsController extends AppController {
     public function add() {
         $email = $this->Emails->newEntity();
         if ($this->request->is('post')) {
-            $email = $this->Emails->patchEntity($email, $this->request->data);
+            $email = $this->Emails->patchEntity($email, $this->request->getData());
             if ($this->Emails->save($email)) {
                 $this->Flash->success(__('The email has been saved.'));
 
@@ -88,7 +88,7 @@ class EmailsController extends AppController {
             'contain' => []
         ]);
         if ($this->request->is(['patch', 'post', 'put'])) {
-            $email = $this->Emails->patchEntity($email, $this->request->data);
+            $email = $this->Emails->patchEntity($email, $this->request->getData());
             if ($this->Emails->save($email)) {
                 $this->Flash->success(__('The email has been saved.'));
 
@@ -128,24 +128,47 @@ class EmailsController extends AppController {
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
     public function sendMail($id = null, $send = false) {
-        $email = $this->Emails->get($id);
-        $participants = $this->Participants->find('list');
         if ($this->request->is(['patch', 'post', 'put'])) {
-            $data = $this->request->data;
+            $email = $this->Emails->get($id);
+            $participants = $this->Participants->find('all')->where(['deleted' => 0, 'email IS NOT NULL', 'email IS NOT' => '']);
+           // debug($participants);
+           // die;
+            $data = $this->request->getData();
             $mail = $this->getEmail()
-            ->to('zironside@hotmail.com', 'Zachary Ironside')     // Add a recipient
-            ->subject($this->parseShortcodes($email->subject,$data));
+            ->setSubject($this->parseShortcodes($email->subject,$data));
+            while($participants->valid()) {
+                $participant = $participants->current();
+                $mail->addTo($participant->email, $participant->full_name);
+                $participants->next();
+            }
             if (!$mail->send($this->parseShortcodes($email->message, $data))) {
-                echo 'Message could not be sent.';
+                $this->Flash->error('Message could not be sent.');
                 echo 'Mailer Error: ' . $mail->ErrorInfo;
             } else {
-                echo 'Message has been sent';
+                $this->Flash->success('Message sent!');
             }
+            return $this->redirect(['action' => 'view', $id]);
         }
-        $this->set(compact('email', 'participants'));
-        $this->set('_serialize', ['email']);
     }
 
+    public function sendTestEmail($id) {
+        if ($this->request->is(['patch', 'post', 'put'])) {
+            $email = $this->Emails->get($id);
+
+            $data = $this->request->getData();
+            $mail = $this->getEmail()
+            ->setTo($this->request->getData('to_email'))
+            ->setSubject($this->parseShortcodes($email->subject,$data));
+            if (!$mail->send($this->parseShortcodes($email->message, $data))) {
+                $this->Flash->error('Message could not be sent.');
+                echo 'Mailer Error: ' . $mail->ErrorInfo;
+            } else {
+                $this->Flash->success('Message sent!');
+            }
+            return $this->redirect(['action' => 'view', $id]);
+        }
+
+    }
 
     private function parseShortcodes($message, $data = null) {
         preg_match_all('{{(.*?)}}', $message, $matches);
@@ -210,9 +233,9 @@ class EmailsController extends AppController {
 
     private function getEmail() {
         $email = new Email('default');
-        return $email->emailFormat('html')
-            ->from('carts@gtiwebdev.com', 'Cart Witnessing')
-            ->replyTo('carts@gtiwebdev.com', 'Cart Witnessing');
+        return $email->setEmailFormat('html')
+            ->setFrom('carts@gtiwebdev.com', 'Cart Witnessing')
+            ->setReplyTo('carts@gtiwebdev.com', 'Cart Witnessing');
     }
 
     public function getMonth($data) {
