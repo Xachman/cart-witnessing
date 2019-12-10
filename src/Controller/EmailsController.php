@@ -63,7 +63,7 @@ class EmailsController extends AppController {
     public function add() {
         $email = $this->Emails->newEntity();
         if ($this->request->is('post')) {
-            $email = $this->Emails->patchEntity($email, $this->request->data);
+            $email = $this->Emails->patchEntity($email, $this->request->getData());
             if ($this->Emails->save($email)) {
                 $this->Flash->success(__('The email has been saved.'));
 
@@ -88,7 +88,7 @@ class EmailsController extends AppController {
             'contain' => []
         ]);
         if ($this->request->is(['patch', 'post', 'put'])) {
-            $email = $this->Emails->patchEntity($email, $this->request->data);
+            $email = $this->Emails->patchEntity($email, $this->request->getData());
             if ($this->Emails->save($email)) {
                 $this->Flash->success(__('The email has been saved.'));
 
@@ -151,6 +151,24 @@ class EmailsController extends AppController {
         }
     }
 
+    public function sendTestEmail($id) {
+        if ($this->request->is(['patch', 'post', 'put'])) {
+            $email = $this->Emails->get($id);
+
+            $data = $this->request->getData();
+            $mail = $this->getEmail()
+            ->setTo($this->request->getData('to_email'))
+            ->setSubject($this->parseShortcodes($email->subject,$data));
+            if (!$mail->send($this->parseShortcodes($email->message, $data))) {
+                $this->Flash->error('Message could not be sent.');
+                echo 'Mailer Error: ' . $mail->ErrorInfo;
+            } else {
+                $this->Flash->success('Message sent!');
+            }
+            return $this->redirect(['action' => 'view', $id]);
+        }
+
+    }
 
     private function parseShortcodes($message, $data = null) {
         preg_match_all('{{(.*?)}}', $message, $matches);
