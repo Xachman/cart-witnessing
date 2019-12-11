@@ -75,7 +75,7 @@ class ParticipantsController extends AppController
             'contain' => []
         ]);
         if ($this->request->is(['patch', 'post', 'put'])) {
-            $participant = $this->Participants->patchEntity($participant, $this->request->data);
+            $participant = $this->Participants->patchEntity($participant, $this->request->getData());
             if ($this->Participants->save($participant)) {
                 $this->Flash->success(__('The participant has been saved.'));
 

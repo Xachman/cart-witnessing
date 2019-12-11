@@ -4,6 +4,7 @@ namespace App\Model\Table;
 use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
+use Cake\Utility\Text;
 use Cake\Validation\Validator;
 
 /**
@@ -74,6 +75,11 @@ class ParticipantsTable extends Table
         return $validator;
     }
 
+    public function beforeSave($event, $entity, $options) {
+        if(!$entity->uuid) {
+            $entity->uuid = Text::uuid();
+        }
+    }
     /**
      * Returns a rules checker object that will be used for validating
      * application integrity.
