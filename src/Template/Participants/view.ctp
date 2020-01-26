@@ -31,12 +31,9 @@
             <td><?= $this->Number->format($participant->id) ?></td>
         </tr>
         <tr>
-            <th scope="row"><?= __('Created') ?></th>
-            <td><?= h($participant->created) ?></td>
-        </tr>
-        <tr>
-            <th scope="row"><?= __('Modified') ?></th>
-            <td><?= h($participant->modified) ?></td>
+            <th scope="row"><?= __('UUID') ?></th>
+            <td><?= h($participant->uuid) ?></td>
         </tr>
     </table>
+    <a class="button small" href="/calendar/self-schedule?id=<?=$participant->uuid?>"  >Impersonate</a>
 </div>
