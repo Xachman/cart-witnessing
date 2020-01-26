@@ -72,7 +72,6 @@ class ScheduledLocationsController extends AppController
             if($participantId) {
                 $data['participant_id'] = $participantId;
             }
-            $data['google_calendar_id'] = "yo";
             $scheduledLocation = $this->ScheduledLocations->patchEntity($scheduledLocation, $data);
             if ($this->ScheduledLocations->save($scheduledLocation)) {
 
@@ -100,7 +99,8 @@ class ScheduledLocationsController extends AppController
             $locations[$location->id] = $location->name .' - '. $days[$location->day];
         }
         $participants = array();
-        foreach($this->ScheduledLocations->getAvailableParticipants($locationId, $selectedDate) as $participant) {
+        $this->loadModel('Participants');
+        foreach($this->Participants->find('all', ['order' => ['Participants.first_name' => 'DESC']])->toArray() as $participant) {
             $participants[$participant->id] =  $participant->first_name . ' ' .$participant->last_name;
         }
         if((int) $locationId) {
@@ -115,6 +115,13 @@ class ScheduledLocationsController extends AppController
 		    $participantId = $session->read('self_checkout_paricipant_id');
 			if (!$participantId) {
                 $this->Flash->error('No ID');
+                return $this->redirect(['controller' => 'Calendar', 'action' => 'selfSchedule']);
+            }
+            $lastDate = new \DateTime();
+            $lastDate->setTimestamp(\strtotime("+30 days"));
+            $date = new \DateTime($selectedDate);
+            if($date->getTimestamp() > $lastDate->getTimestamp()) {
+                $this->Flash->error('Past 30 Days');
                 return $this->redirect(['controller' => 'Calendar', 'action' => 'selfSchedule']);
             }
             $this->add($locationId, $selectedDate, $participantId);
