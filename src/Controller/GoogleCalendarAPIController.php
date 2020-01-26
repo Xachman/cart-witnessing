@@ -6,7 +6,6 @@ namespace App\Controller;
 use App\Model\GoogleCalendar;
 
 class GoogleCalendarAPIController extends AppController {
-	private $calendarId = "sd9na6b10g095djnmfhptfeibg@group.calendar.google.com";
 	private $format = 'Y-m-d\TH:i:sP';
 	private $GoogleCalendar;
 
