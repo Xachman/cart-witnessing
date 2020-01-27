@@ -118,10 +118,10 @@ class ScheduledLocationsController extends AppController
                 return $this->redirect(['controller' => 'Calendar', 'action' => 'selfSchedule']);
             }
             $lastDate = new \DateTime();
-            $lastDate->setTimestamp(\strtotime("+30 days"));
+            $lastDate->setTimestamp(\strtotime("last day of next month"));
             $date = new \DateTime($selectedDate);
             if($date->getTimestamp() > $lastDate->getTimestamp()) {
-                $this->Flash->error('Past 30 Days');
+                $this->Flash->error('Scheduled too far out.');
                 return $this->redirect(['controller' => 'Calendar', 'action' => 'selfSchedule']);
             }
             $this->add($locationId, $selectedDate, $participantId);
