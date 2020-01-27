@@ -82,7 +82,7 @@ class Calendar {
     
     public function getFullCalendarData($startDateStr = "", $endDateStr = "", $participant) {
         $lastViewDate = new \DateTime();
-        $lastViewDate->setTimestamp(\strtotime("+30 days"));
+        $lastViewDate->setTimestamp(\strtotime("last day of next month"));
         $endDate = new \DateTime($endDateStr);
         if($lastViewDate->getTimestamp() < $endDate->getTimestamp()) {
             $data = $this->getCalendarData($startDateStr, $lastViewDate->format("Y-m-d"));
