@@ -41,6 +41,8 @@ $cakeDescription = 'Cart Witnessing';
             <div class="columns large-12 ctp-warning checks">
                 <a href="/participant-availability" class="button">Availability</a>
                 <a href="/participants" class="button">Participants</a>
+                <a href="/locations" class="button">Locations</a>
+                <a href="/scheduled-locations" class="button">Scheduled Locations</a>
 				<a href="/calendar/month/<?php echo date("Y-m-d") ?>" class="button">Schedule Month</a>
 				<a href="/emails" class="button">Email</a>
             </div>

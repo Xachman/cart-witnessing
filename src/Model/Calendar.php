@@ -81,7 +81,14 @@ class Calendar {
     }
     
     public function getFullCalendarData($startDateStr = "", $endDateStr = "", $participant) {
-        $data = $this->getCalendarData($startDateStr, $endDateStr);
+        $lastViewDate = new \DateTime();
+        $lastViewDate->setTimestamp(\strtotime("+30 days"));
+        $endDate = new \DateTime($endDateStr);
+        if($lastViewDate->getTimestamp() < $endDate->getTimestamp()) {
+            $data = $this->getCalendarData($startDateStr, $lastViewDate->format("Y-m-d"));
+        } else {
+            $data = $this->getCalendarData($startDateStr, $endDateStr);
+        }
 
         $results = [];
         $urlHelper = new UrlHelper(new View);
